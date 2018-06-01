@@ -36,7 +36,7 @@ Le but va être d'explorer différentes possibilités pour la visualisation et l
 - [**Semaine 3**](#semaine-3-(11/06-15/06))
 - [**Semaine 4**](#semaine-4-(18/06-22/06))
 - [**Semaine 5**](#semaine-5-(25/06-29/06))
-  
+
 ### Semaine 1 (28/05-01/06)
 
 [*Retour au calendrier*](#développement-du-projet)
@@ -60,3 +60,7 @@ Le but va être d'explorer différentes possibilités pour la visualisation et l
 
 [*Retour au calendrier*](#développement-du-projet)
 
+## Reference
+
+- [Exploration and Visualization in the Web of Big Linked Data: A Survey of the State of the Art](https://arxiv.org/pdf/1601.08059.pdf)
+- [Top-k Exploration of Query Candidates for Efficient Keyword Search on Graph-Shaped (RDF) Data](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=4812421)
