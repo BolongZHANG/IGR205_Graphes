@@ -2,6 +2,10 @@
 
 **Interactions sur des graphes de connaissances interconnectés**
 
+Site pédagogique: [Liste des projets](https://perso.telecom-paristech.fr/jthiery/cours/igr205/igr205.html)
+
+Work space: [Google Drive](https://drive.google.com/open?id=1SBImnKs75XvDbojn9aVy144yBejnYwrB)
+
 ## Encadrants
 
 [Jean-Claude Moissinac](https://moissinac.wp.imt.fr/)
@@ -31,32 +35,37 @@ Le but va être d'explorer différentes possibilités pour la visualisation et l
 
 ## Développement du projet
 
-- [**Semaine 1**](#semaine-1-(28/05-01/06))
-- [**Semaine 2**](#semaine-2-(04/06-08/06))
-- [**Semaine 3**](#semaine-3-(11/06-15/06))
-- [**Semaine 4**](#semaine-4-(18/06-22/06))
-- [**Semaine 5**](#semaine-5-(25/06-29/06))
+- [**Semaine 1**](#semaine-1)
+- [**Semaine 2**](#semaine-2)
+- [**Semaine 3**](#semaine-3)
+- [**Semaine 4**](#semaine-4)
+- [**Semaine 5**](#semaine-5)
 
-### Semaine 1 (28/05-01/06)
-
-[*Retour au calendrier*](#développement-du-projet)
-
-### Semaine 2 (04/06-08/06)
+### Semaine 1
+**28/05-01/06**
 
 [*Retour au calendrier*](#développement-du-projet)
 
-
-### Semaine 3 (11/06-15/06)
+### Semaine 2
+**04/06-08/06**
 
 [*Retour au calendrier*](#développement-du-projet)
 
 
-### Semaine 4 (18/06-22/06)
+### Semaine 3
+**11/06-15/06**
 
 [*Retour au calendrier*](#développement-du-projet)
 
 
-### Semaine 5 (25/06-29/06)
+### Semaine 4
+**18/06-22/06**
+
+[*Retour au calendrier*](#développement-du-projet)
+
+
+### Semaine 5
+**25/06-29/06**
 
 [*Retour au calendrier*](#développement-du-projet)
 
