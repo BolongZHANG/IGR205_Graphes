@@ -1,54 +1,54 @@
 
-let height = 800, width = 1800
-let color = d3.scaleOrdinal(d3.schemeCategory10)
-let dataset, scaleR
+let height = 800, width = 1800;
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+let dataset, scaleR;
 
 
 let svg = d3.select("body").append('svg')
     .attr('width', width)
-    .attr('height', height)
-let links = svg.append("g").attr('class','links').selectAll('line')
-let nodes = svg.append('g').attr('class','nodes').selectAll('circle')
+    .attr('height', height);
+let links = svg.append("g").attr('class','links').selectAll('line');
+let nodes = svg.append('g').attr('class','nodes').selectAll('circle');
 
 let simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceCollide(20))
-    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("center", d3.forceCenter(width / 2, height / 2));
 
 function updateScale(){
-    let max = d3.max(dataset.nodes, d =>d.size)
-    let min = d3.min(dataset.nodes, d => d.size)
+    let max = d3.max(dataset.nodes, d =>d.size);
+    let min = d3.min(dataset.nodes, d => d.size);
 
-    console.log('min:', min, 'max', max)
+    console.log('min:', min, 'max', max);
     scaleR = d3.scaleLinear().range([5,25])
         .domain([min, max])
 }
 
 
 function updateGraph(graph) {
-    dataset = graph
-    updateScale()
-    links = links.data(dataset.links)
-    nodes = nodes.data(dataset.nodes, d=> d.id)
+    dataset = graph;
+    updateScale();
+    links = links.data(dataset.links);
+    nodes = nodes.data(dataset.nodes, d=> d.id);
 
     links.exit()
         .transition()
         .duration(300)
         .attr("stroke-width", 0)
-        .remove()
+        .remove();
 
     nodes.exit()
         .transition().duration(500)
         .attr("r", 0)
         .attr("fill", function(d) { return color(d.group); })
-        .remove()
+        .remove();
 
 
 
     links = links.enter().append("line")
         .attr("stroke-width", 2)
         .attr('stroke', 'black')
-        .merge(links)
+        .merge(links);
 
 
     nodes = nodes.enter()
@@ -56,7 +56,7 @@ function updateGraph(graph) {
         .attr('r', d=> scaleR(d.size))
         .attr("fill", function(d) { return color(d.group); })
         .on('click', (d) => {
-            console.log(d)
+            console.log(d);
             d3.json('data/' + d.file)
                 .then(
                     updateGraph
@@ -65,11 +65,11 @@ function updateGraph(graph) {
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended))
-        .merge(nodes)
+        .merge(nodes);
 
     nodes.transition()
         .duration(1000)
-        .attr('r', d=>scaleR(d.size))
+        .attr('r', d=>scaleR(d.size));
 
 
 
@@ -91,9 +91,9 @@ function updateGraph(graph) {
 
 d3.json('data/total_G.json').then(
     data => {
-        ori_data = data
+        ori_data = data;
         updateGraph(data)
-    })
+    });
 
 
 function dragstarted(d) {
@@ -132,4 +132,4 @@ d3.select('#back').on('click', function(){
         data => {
             updateGraph(data)
         })
-})
+});
