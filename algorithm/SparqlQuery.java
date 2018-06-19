@@ -100,6 +100,7 @@ public class SparqlQuery {
 
 			NeighborInfo[][] adjacentList = new NeighborInfo[NodeNum][];
 
+			System.out.println("loading adjacent list...");
 			str = br.readLine();
 			while (str != null) {
 
@@ -107,6 +108,7 @@ public class SparqlQuery {
 				TermArr = str.split("\t");
 				cur_id = Integer.valueOf(TermArr[0]);
 				TermArr1 = TermArr[1].split(" ");
+				// (neighbor_id, label_id, distance, direction)
 				adjacentList[cur_id] = new NeighborInfo[TermArr1.length / 4];
 				for (int i = 0; i < TermArr1.length; i = i + 4) {
 					neighbor_id = Integer.valueOf(TermArr1[i]);
@@ -132,6 +134,7 @@ public class SparqlQuery {
 			BufferedReader br_entity = new BufferedReader(inr_entity);
 
 			str = br_entity.readLine();
+			// entity tag: 1 means entities, 0 means data values
 			Arrays.fill(entityTagArr, (byte) 0);
 
 			while (str != null) {
@@ -274,6 +277,8 @@ public class SparqlQuery {
 			Date loadingEndTime = new Date();
 			System.out.print("loading time:");
 			System.out.println(loadingEndTime.getTime() - loadingStartTime.getTime() + "ms");
+			
+			/**************** End of loading data ******************/
 
 			System.out.println("begin to process query...");
 			String fileStr = args[0];
@@ -284,7 +289,9 @@ public class SparqlQuery {
 			System.out.println(fileStr);
 			Date currentTime1 = new Date();
 			str = br1.readLine();
+			System.out.println(str);
 			TermArr = str.split(";");
+			System.out.println(TermArr.length);
 			int[][] visited = new int[TermArr.length][NodeNum];
 			int[][] candidateDist = new int[TermArr.length][NodeNum];
 			byte[] b = null;
@@ -406,6 +413,8 @@ public class SparqlQuery {
 			Date currentTime2 = new Date();
 			System.out.println(currentTime2.getTime() - currentTime1.getTime());
 
+			/************ speration of keyword and query *****************/
+
 			str = br1.readLine();
 			ArrayList<String> tpList = ParseSPARQL(str);
 
@@ -418,6 +427,7 @@ public class SparqlQuery {
 			ArrayList<String> curList = null;
 			HashSet<String> varSet = new HashSet<String>();
 
+			// System.out.println(tpList.toString());
 			for (int tpIdx = 0; tpIdx < tpList.size(); tpIdx++) {
 				str = tpList.get(tpIdx);
 				TermArr = str.split("\t");

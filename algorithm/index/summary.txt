@@ -1,0 +1,19 @@
+<http://givingsense.eu/sembib/onto/persons/Belfiore_Jean-claude> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Belfiore_Jean-claude> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Belfiore_Jean-claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Belfiore"
+<http://givingsense.eu/sembib/onto/persons/Dufourd_Jean-Claude> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Dufourd_Jean-Claude> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Dufourd_Jean-Claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Dufourd"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://purl.org/spar/pro/holdsRoleInTime> <http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude-author>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://purl.org/spar/pro/holdsRoleInTime> <http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude-at-tpt>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/familyName> "Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude-at-tpt> <http://purl.org/spar/pro/relatesToOrganization> <http://data.semanticweb.org/organization/telecom-paristech>
+<http://data.semanticweb.org/organization/telecom-paristech> <http://www.w3.org/2000/01/rdf-schema#label> "Telecom ParisTech"
+<http://data.semanticweb.org/organization/telecom-paristech> <http://xmlns.com/foaf/0.1/name> "Telecom ParisTech"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/familyName> "Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"

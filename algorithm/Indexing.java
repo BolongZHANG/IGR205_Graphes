@@ -48,7 +48,7 @@ public class Indexing {
 			int count = 0;
 			String[] TermArr;
 			// default 100 pivot
-			int PivotNum = 100;
+			int PivotNum = Integer.valueOf(args[1]);
 
 			String dir_index = "index";
 			File file = new File(dir_index);
@@ -426,7 +426,8 @@ public class Indexing {
 			}
 
 			prc.waitFor();
-
+			
+			System.out.println("parsing fp.out......");
 			InputStream in70 = new FileInputStream(new File(dir_index + "/fp.out"));
 			Reader inr70 = new InputStreamReader(in70);
 			BufferedReader br70 = new BufferedReader(inr70);
@@ -726,23 +727,13 @@ public class Indexing {
 			}
 			out_pivot.flush();
 			out_pivot.close();
+			
 
-			if (myDatabase1 != null) {
-				myDatabase1.close();
-			}
-
-			if (myDbEnvironment1 != null) {
-				myDbEnvironment1.close();
-			}
-
-			if (myDatabase2 != null) {
-				myDatabase2.close();
-			}
-
-			if (myDbEnvironment2 != null) {
-				myDbEnvironment2.close();
-			}
-
+			myDatabase1.close();
+			myDbEnvironment1.close();
+			myDatabase2.close();
+			myDbEnvironment2.close();
+			
 			Date pivotEndTime = new Date();
 			System.out.println(
 					"distanced-based index take " + (pivotEndTime.getTime() - pivotStartTime.getTime()) + " ms.");
@@ -755,7 +746,7 @@ public class Indexing {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
