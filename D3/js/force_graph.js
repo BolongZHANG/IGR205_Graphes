@@ -1,14 +1,11 @@
-
 let height = 800, width = 1800;
-let color = d3.scaleOrdinal(d3.schemeCategory10);
+    let color = d3.scaleOrdinal(d3.schemeCategory20);
 let dataset, scaleR;
 
 
 let svg = d3.select("body").append('svg')
     .attr('width', width)
     .attr('height', height);
-let links = svg.append("g").attr('class','links').selectAll('line');
-let nodes = svg.append('g').attr('class','nodes').selectAll('circle');
 
 let simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
@@ -28,8 +25,12 @@ function updateScale(){
 function updateGraph(graph) {
     dataset = graph;
     updateScale();
-    links = links.data(dataset.links);
-    nodes = nodes.data(dataset.nodes, d=> d.id);
+    let links = svg.selectAll("path.link").data(dataset.edges, d => d.id)
+    links.enter().append('path')
+        .attr('id', d=>d.id)
+        .attr('class', 'link')
+        .attr('marker-end', 'url(#arrowhead)')
+        .merge(links)
 
     links.exit()
         .transition()
@@ -37,18 +38,15 @@ function updateGraph(graph) {
         .attr("stroke-width", 0)
         .remove();
 
+
+    let nodes = svg.selectAll('path.node').data(dataset.nodes, d => d.id)
+    let nodeEnter = node.enter()
     nodes.exit()
         .transition().duration(500)
         .attr("r", 0)
         .attr("fill", function(d) { return color(d.group); })
         .remove();
 
-
-
-    links = links.enter().append("line")
-        .attr("stroke-width", 2)
-        .attr('stroke', 'black')
-        .merge(links);
 
 
     nodes = nodes.enter()
@@ -70,7 +68,6 @@ function updateGraph(graph) {
     nodes.transition()
         .duration(1000)
         .attr('r', d=>scaleR(d.size));
-
 
 
     nodes.append("title")
@@ -133,3 +130,28 @@ d3.select('#back').on('click', function(){
             updateGraph(data)
         })
 });
+
+
+
+function collide(node) {
+    var r = node.radius + 16,
+        nx1 = node.x - r,
+        nx2 = node.x + r,
+        ny1 = node.y - r,
+        ny2 = node.y + r;
+    return function(quad, x1, y1, x2, y2) {
+        if (quad.point && (quad.point !== node)) {
+            var x = node.x - quad.point.x,
+                y = node.y - quad.point.y,
+                l = Math.sqrt(x * x + y * y),
+                r = node.radius + quad.point.radius;
+            if (l < r) {
+                l = (l - r) / l * .5;
+                node.x -= x *= l;
+                node.y -= y *= l;
+                quad.point.x += x;
+                quad.point.y += y;
+            }
+        }
+        return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+    };
