@@ -6,7 +6,6 @@ public class KeyValuePair implements Comparable<KeyValuePair> {
 
 	public KeyValuePair() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

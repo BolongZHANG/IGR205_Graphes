@@ -9,7 +9,7 @@ public class HeapNode implements Comparable<HeapNode> {
 		VertexID = vertexID;
 		Dist = Integer.MAX_VALUE;
 	}
-	
+
 	public HeapNode(HeapNode key) {
 		VertexID = key.VertexID;
 		Dist = key.Dist;

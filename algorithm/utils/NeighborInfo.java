@@ -14,8 +14,8 @@ public class NeighborInfo implements Comparable<NeighborInfo> {
 
 	@Override
 	public String toString() {
-		return "NeighborInfo [NeighborID=" + NeighborID + ", Label=" + Label
-				+ ", Direction=" + Direction + ", Distance=" + Distance + "]";
+		return "NeighborInfo [NeighborID=" + NeighborID + ", Label=" + Label + ", Direction=" + Direction
+				+ ", Distance=" + Distance + "]";
 	}
 
 	@Override

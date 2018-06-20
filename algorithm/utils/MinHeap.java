@@ -1,12 +1,10 @@
 package utils;
 
-import java.io.IOException;
-
 public class MinHeap {
-	public HeapNode[] data; // 存放数据
-	public int[] pos; // 存放数据
-	public int size; // 堆的最大容量
-	public int currentPos;// 当前空闲游标
+	public HeapNode[] data;
+	public int[] pos;
+	public int size;
+	public int currentPos;
 
 	public MinHeap(int size) {
 		this.size = size;
@@ -42,14 +40,12 @@ public class MinHeap {
 			this.pos[value.VertexID] = current;
 			this.currentPos++;
 		}
-
 	}
 
 	public HeapNode delete() {
 
 		if (this.currentPos <= 0) {
-			throw new IndexOutOfBoundsException(
-					Integer.toString(this.currentPos));
+			throw new IndexOutOfBoundsException(Integer.toString(this.currentPos));
 		}
 
 		HeapNode valueReturn = this.data[1];
@@ -61,8 +57,7 @@ public class MinHeap {
 
 		while (current < this.currentPos) {
 			minValue = this.data[current].Dist;
-			if ((current + 1) < this.currentPos
-					&& this.data[current + 1].Dist < minValue) {
+			if ((current + 1) < this.currentPos && this.data[current + 1].Dist < minValue) {
 				minValue = this.data[++current].Dist;
 			}
 
@@ -73,7 +68,6 @@ public class MinHeap {
 				this.pos[this.data[current].VertexID] = parent;
 				parent = current;
 				current *= 2;
-
 			}
 		}
 
@@ -102,5 +96,4 @@ public class MinHeap {
 		this.data[current] = tempHeapNode;
 		this.pos[tempHeapNode.VertexID] = current;
 	}
-
 }

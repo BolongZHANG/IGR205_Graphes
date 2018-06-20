@@ -1,9 +1,9 @@
 package utils;
 
 public class MaxHeap {
-	private HeapNode[] data; // 存放数据
-	private int size; // 堆的最大容量
-	private int currentPos;// 当前空闲游标
+	private HeapNode[] data;
+	private int size;
+	private int currentPos;
 
 	public MaxHeap(int size) {
 		this.size = size;
@@ -35,13 +35,11 @@ public class MaxHeap {
 			this.data[current] = value;
 			this.currentPos++;
 		}
-
 	}
 
 	public HeapNode delete() {
 		if (this.currentPos <= 0) {
-			throw new IndexOutOfBoundsException(
-					Integer.toString(this.currentPos));
+			throw new IndexOutOfBoundsException(Integer.toString(this.currentPos));
 		}
 
 		HeapNode valueReturn = this.data[1];
@@ -53,8 +51,7 @@ public class MaxHeap {
 
 		while (current < this.currentPos) {
 			maxValue = this.data[current].Dist;
-			if ((current + 1) < this.currentPos
-					&& this.data[current + 1].Dist > maxValue) {
+			if ((current + 1) < this.currentPos && this.data[current + 1].Dist > maxValue) {
 				maxValue = this.data[++current].Dist;
 			}
 
@@ -64,12 +61,10 @@ public class MaxHeap {
 				this.data[parent] = this.data[current];
 				parent = current;
 				current *= 2;
-
 			}
 		}
 
 		this.data[parent] = temp;
 		return valueReturn;
 	}
-
 }

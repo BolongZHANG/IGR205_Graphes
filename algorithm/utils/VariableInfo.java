@@ -51,7 +51,6 @@ public class VariableInfo implements Comparable<VariableInfo> {
 
 	@Override
 	public String toString() {
-		return "VariableInfo [VariableStr=" + VariableStr + ", matchesSet="
-				+ matchesSet + "]";
+		return "VariableInfo [VariableStr=" + VariableStr + ", matchesSet=" + matchesSet + "]";
 	}
 }

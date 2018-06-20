@@ -1,23 +1,12 @@
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,7 +25,6 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 import org.openrdf.query.parser.ParsedQuery;
@@ -57,23 +45,22 @@ import utils.HeapNode;
 import utils.VariableInfo;
 import utils.ResultInfo;
 
+@SuppressWarnings("deprecation")
 public class SparqlQuery {
 	public static void main(String[] args) {
+		if (args.length != 2) {
+			System.out.println("usage:");
+			System.out.println("================");
+			System.out.println("java -classpath algo.jar SparqlQuery <keyword+query file location> <top k>");
+			System.out.println("");
+			System.out.println("for example,");
+			System.out.println("java -classpath algo.jar SparqlQuery data/sembib_Q1.txt 10");
+			System.exit(0);
+		}
 		try {
 			String str = "";
 			int cur_id = 0;
 			String[] TermArr, TermArr1;
-
-			if (args.length != 2) {
-				System.out.println("usage:");
-				System.out.println("================");
-				System.out.println("java -classpath algo.jar SparqlQuery <keyword+query file location> <top k>");
-				System.out.println("");
-				System.out.println("for example,");
-				System.out.println("java -classpath algo.jar SparqlQuery data/sembib_Q1.txt 10");
-				System.exit(0);
-			}
-
 			String dir_index = "index";
 			int TopKNum = Integer.valueOf(args[1]);
 
@@ -83,7 +70,6 @@ public class SparqlQuery {
 			envConfig1.setAllowCreate(true);
 			Environment myDbEnvironment1 = new Environment(new File(dir_index + "/DistanceIndex"), envConfig1);
 
-			// Open the database. Create it if it does not already exist.
 			DatabaseConfig dbConfig1 = new DatabaseConfig();
 			dbConfig1.setAllowCreate(true);
 			Database myDatabase1 = myDbEnvironment1.openDatabase(null, "DistanceIndexDB", dbConfig1);
@@ -92,12 +78,13 @@ public class SparqlQuery {
 			envConfig2.setAllowCreate(true);
 			Environment myDbEnvironment2 = new Environment(new File(dir_index + "/StructuralIndex"), envConfig2);
 
-			// Open the database. Create it if it does not already exist.
 			DatabaseConfig dbConfig2 = new DatabaseConfig();
 			dbConfig2.setAllowCreate(true);
 			Database myDatabase2 = myDbEnvironment2.openDatabase(null, "StructuralIndexDB", dbConfig2);
 
-			System.out.println("loading RDF graph...");
+			/**************** Beginning of loading data ******************/
+
+			System.out.println("loading adjacent list...");
 			InputStream in = new FileInputStream(new File(dir_index + "/graph_adjacent_list.txt"));
 			Reader inr = new InputStreamReader(in);
 			BufferedReader br = new BufferedReader(inr);
@@ -107,10 +94,8 @@ public class SparqlQuery {
 
 			str = br.readLine();
 			NodeNum = Integer.valueOf(str);
-
 			NeighborInfo[][] adjacentList = new NeighborInfo[NodeNum][];
 
-			System.out.println("loading adjacent list...");
 			str = br.readLine();
 			while (str != null) {
 
@@ -134,7 +119,7 @@ public class SparqlQuery {
 
 			br.close();
 
-			System.out.println("loading Entity ID Map...");
+			System.out.println("loading entity_id_map...");
 			HashMap<Integer, String> IDEntityMap = new HashMap<Integer, String>();
 			HashMap<String, Integer> EntityIDMap = new HashMap<String, Integer>();
 			byte[] entityTagArr = new byte[NodeNum];
@@ -148,7 +133,6 @@ public class SparqlQuery {
 			Arrays.fill(entityTagArr, (byte) 0);
 
 			while (str != null) {
-
 				TermArr = str.split("\t");
 				cur_id = Integer.valueOf(TermArr[0]);
 				EntityIDMap.put(TermArr[1], cur_id);
@@ -172,7 +156,6 @@ public class SparqlQuery {
 			cur_id = 0;
 			HashSet<Integer> RNSet = new HashSet<Integer>();
 
-			long count = 0;
 			while (str != null) {
 
 				TermArr = str.split("\t");
@@ -184,7 +167,7 @@ public class SparqlQuery {
 			}
 			br175.close();
 
-			System.out.println("loading structural index ...");
+			System.out.println("loading predicate weights...");
 			InputStream in650 = new FileInputStream(new File(dir_index + "/p_weight.txt"));
 			Reader inr650 = new InputStreamReader(in650);
 			BufferedReader br650 = new BufferedReader(inr650);
@@ -196,7 +179,6 @@ public class SparqlQuery {
 			int item_id = 0, p_id = 0;
 
 			str = br650.readLine();
-			count = 0;
 			while (str != null) {
 				TermArr = str.split(" ");
 
@@ -221,6 +203,7 @@ public class SparqlQuery {
 
 			br650.close();
 
+			System.out.println("loading structural index...");
 			InputStream in70 = new FileInputStream(new File(dir_index + "/fp.out"));
 			Reader inr70 = new InputStreamReader(in70);
 			BufferedReader br70 = new BufferedReader(inr70);
@@ -228,11 +211,10 @@ public class SparqlQuery {
 			TreeSet<Integer> frequentItemSet = new TreeSet<Integer>();
 			TreeMap<Integer, ArrayList<Integer>> ItemFPListMap = new TreeMap<Integer, ArrayList<Integer>>();
 			ArrayList<FPInfo> fpList = new ArrayList<FPInfo>();
-			String itemStr = "", fpStr = "";
+			String fpStr = "";
 			int cur_frequency = 0;
 
 			str = br70.readLine();
-			count = 0;
 			while (str != null) {
 				TermArr = str.split(":");
 
@@ -290,13 +272,13 @@ public class SparqlQuery {
 
 			/**************** End of loading data ******************/
 
-			System.out.println("begin to process query...");
+			System.out.println("begin to process keyword...");
 			String fileStr = args[0];
+			System.out.println("file location: " + fileStr);
 			InputStream in1 = new FileInputStream(new File(fileStr));
 			Reader inr1 = new InputStreamReader(in1);
 			BufferedReader br1 = new BufferedReader(inr1);
 
-			System.out.println("file location: " + fileStr);
 			Date currentTime1 = new Date();
 			str = br1.readLine();
 			System.out.println("keyword: " + str);
@@ -317,8 +299,6 @@ public class SparqlQuery {
 
 				HashSet<Integer> visitedRNSet = new HashSet<Integer>();
 				TreeSet<HeapNode> candidate = new TreeSet<HeapNode>();
-				// ArrayList<Integer> keywordelementslist = new
-				// ArrayList<Integer>();
 
 				Hits hits = null;
 				Query query = null;
@@ -343,7 +323,6 @@ public class SparqlQuery {
 
 						candidate.add(curHeapNode);
 						keyword_count++;
-
 					}
 
 					while (candidate.size() != 0) {
@@ -415,15 +394,13 @@ public class SparqlQuery {
 					}
 
 				}
-
 			}
 
 			System.out.print("candidateDist time:");
 			Date currentTime2 = new Date();
 			System.out.println(currentTime2.getTime() - currentTime1.getTime());
 
-			/************ speration of keyword and query *****************/
-
+			System.out.println("begin to process SPARQL query...");
 			str = br1.readLine();
 			ArrayList<String> tpList = ParseSPARQL(str);
 
@@ -436,14 +413,11 @@ public class SparqlQuery {
 			ArrayList<String> curList = null;
 			HashSet<String> varSet = new HashSet<String>();
 
-			// System.out.println(tpList.toString());
 			for (int tpIdx = 0; tpIdx < tpList.size(); tpIdx++) {
 				str = tpList.get(tpIdx);
 				TermArr = str.split("\t");
 
 				curPredicateID = PredicateIDMap.get(TermArr[1]);
-
-				// =========================================================
 				tmp_direction = -1;
 
 				if (!(TermArr[0].startsWith("?"))) {
@@ -479,8 +453,6 @@ public class SparqlQuery {
 					NeighborInfo curNeighborInfo = new NeighborInfo(TermArr[0].hashCode(), curPredicateID);
 					curNeighborInfo.Direction = 1;
 					QueryStarPatternMap.get(TermArr[2]).add(curNeighborInfo);
-
-					// ========================================
 
 					if (QueryAdjacentList.containsKey(TermArr[0])) {
 						curList = QueryAdjacentList.get(TermArr[0]);
@@ -540,7 +512,6 @@ public class SparqlQuery {
 					DatabaseEntry theData = new DatabaseEntry();
 
 					if (myDatabase2.get(null, theKey, theData, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
-						// Recreate the data String.
 						byte[] retData = theData.getData();
 						int[] idList = byteToInt2(retData);
 
@@ -558,12 +529,10 @@ public class SparqlQuery {
 					} else {
 						System.out.println("No record found for key '" + fpStr + "'.");
 					}
-
 				}
-
 			}
 
-			System.out.print("candidates number:");
+			System.out.print("candidates number: ");
 
 			Iterator<VariableInfo> iter2 = VariableInfoSet.iterator();
 			int min = Integer.MAX_VALUE;
@@ -637,7 +606,6 @@ public class SparqlQuery {
 
 			int next_match_pos = 0, cur_socre_bound = Integer.MAX_VALUE;
 			while (resultStack.size() != 0 && queryEdgeList.size() != 0) {
-
 				if (resultSet.size() > TopKNum)
 					cur_socre_bound = resultSet.last().getScore();
 
@@ -656,7 +624,6 @@ public class SparqlQuery {
 
 				TermArr2 = adjacentList[(tempResultInfo.matchArr[cur_match_pos])];
 
-				// while (rs.next()) {
 				for (int i1 = 0; i1 < TermArr2.length; i1++) {
 					if (TermArr2[i1].Label != curPredicateID || TermArr2[i1].Direction != tmp_direction)
 						continue;
@@ -716,46 +683,71 @@ public class SparqlQuery {
 			System.out.print("total time:");
 			System.out.println(currentTime3.getTime() - currentTime1.getTime());
 
-			for (int i = 0; i < variableArr.length; i++)
+			PrintStream out_summary = new PrintStream(new File(dir_index + "/queryAns.txt"));
+			PrintStream out_summary_json = new PrintStream(new File(dir_index + "/queryAns.json"));
+			out_summary_json.print("{\r\n" + "  \"head\": {\r\n" + "    \"vars\": [");
+
+			for (int i = 0; i < variableArr.length; i++) {
 				System.out.print(variableArr[i] + "\t");
+				out_summary_json.print("\"" + variableArr[i] + "\"");
+				if (i < variableArr.length - 1) {
+					out_summary_json.print(",");
+				}
+			}
+			out_summary_json.print("]\r\n" + "  } ,\r\n" + "  \"results\": {\r\n" + "    \"bindings\": [");
+
 			System.out.println();
 			System.out.println(resultSet.size());
 
-			PrintStream out_summary = new PrintStream(new File(dir_index + "/queryAns.txt"));
 			Iterator<ResultInfo> iter = resultSet.iterator();
 			while (iter.hasNext()) {
 				ResultInfo e = iter.next();
+				out_summary_json.print("{");
 				for (int i = 0; i < e.matchArr.length; i++) {
+					out_summary_json.print("\"" + variableArr[i] + "\": { \"type\": ");
+					if (IDEntityMap.get(e.matchArr[i]).charAt(0) == '<') {
+						out_summary_json.print("\"uri\" , \"value\": ");
+					} else {
+						out_summary_json.print("\"literal\" , \"value\": ");
+					}
 					System.out.print(IDEntityMap.get(e.matchArr[i]) + "\t");
 					out_summary.print(IDEntityMap.get(e.matchArr[i]) + "\t");
+					out_summary_json.print("\"" + IDEntityMap.get(e.matchArr[i]) + "\"" + "}");
+					if (i < e.matchArr.length - 1) {
+						out_summary_json.print(",");
+					}
 				}
 				System.out.println(Arrays.toString(e.scoreArr));
 				out_summary.println();
+				out_summary_json.print("}");
+				if (iter.hasNext()) {
+					out_summary_json.print(",");
+				}
 			}
+			out_summary_json.print("]\r\n" + "  }\r\n" + "}");
 
-			// System.out.println("candidate count:\t" + candidate_count);
 			System.out.println("keyword count:\t" + keyword_count);
-			System.out.println("results can be found at index/queryAns.txt");
+			System.out.println("results can be found at index/queryAns.txt and index/queryAns.json");
+			System.out.println("finished!");
 
 			out_summary.flush();
 			out_summary.close();
+			out_summary_json.flush();
+			out_summary_json.close();
+
 			if (myDatabase1 != null) {
 				myDatabase1.close();
 			}
-
 			if (myDbEnvironment1 != null) {
 				myDbEnvironment1.close();
 			}
 			if (myDatabase2 != null) {
 				myDatabase2.close();
 			}
-
 			if (myDbEnvironment2 != null) {
 				myDbEnvironment2.close();
 			}
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -766,8 +758,8 @@ public class SparqlQuery {
 			TreeMap<Integer, Integer> LabelItemPosMap) {
 
 		TreeMap<String, TreeSet<String>> VarPatternMap = new TreeMap<String, TreeSet<String>>();
-
 		Iterator<Entry<String, ArrayList<NeighborInfo>>> iter_var = QueryStarPatternMap.entrySet().iterator();
+
 		int label_count = 0;
 		while (iter_var.hasNext()) {
 			Entry<String, ArrayList<NeighborInfo>> e = iter_var.next();
@@ -895,7 +887,6 @@ public class SparqlQuery {
 					}
 				}
 			}
-
 		}
 		return VarPatternMap;
 	}
@@ -921,7 +912,6 @@ public class SparqlQuery {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -954,7 +944,6 @@ public class SparqlQuery {
 	}
 
 	private static ArrayList<String> ParseSPARQL(String queryString) {
-
 		ArrayList<String> tpList = new ArrayList<String>();
 
 		try {
@@ -971,11 +960,7 @@ public class SparqlQuery {
 				tpList.add(TP2String(curPattern));
 			}
 
-		} catch (MalformedQueryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -1000,7 +985,6 @@ public class SparqlQuery {
 		if (!curPattern.getObjectVar().isConstant()) {
 			curTriplePatternStr += "?" + curPattern.getObjectVar().getName() + "\t";
 		} else {
-
 			if (!curPattern.getObjectVar().getValue().toString().startsWith("\"")) {
 				curTriplePatternStr += "<" + curPattern.getObjectVar().getValue().toString() + ">\t";
 			} else {

@@ -1,28 +1,15 @@
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -41,29 +28,30 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
 
-import utils.FPInfo;
-import utils.ItemInfo;
 import utils.NeighborInfo;
 import utils.HeapNode;
 
+@SuppressWarnings("deprecation")
 public class SummaryGraph {
 	public static void main(String[] args) {
+		if (args.length != 3) {
+			System.out.println("usage:");
+			System.out.println("================");
+			System.out.println(
+					"java -classpath algo.jar SummaryGraph <original graph location> <keyword file location> <graph radius>");
+			System.out.println("");
+			System.out.println("in keyword file, multiple keywords should be seperated by ;");
+			System.out.println("just like Moissinac;Thomas");
+			System.out.println("graph radius is a positive integer.");
+			System.out.println("");
+			System.out.println("for example,");
+			System.out.println("java -classpath algo.jar SummaryGraph data/persons.nt data/sembib_Q1.txt 20");
+			System.exit(0);
+		}
 		try {
 			String str = "";
 			int cur_id = 0;
 			String[] TermArr, TermArr1;
-
-			if (args.length != 3) {
-				System.out.println("usage:");
-				System.out.println("================");
-				System.out.println(
-						"java -classpath algo.jar SummaryGraph <original graph location> <keyword file location> <graph radius>");
-				System.out.println("");
-				System.out.println("for example,");
-				System.out.println("java -classpath algo.jar SummaryGraph data/persons.nt data/sembib_Q1.txt 20");
-				System.exit(0);
-			}
-
 			String dir_index = "index";
 
 			Date loadingStartTime = new Date();
@@ -72,12 +60,13 @@ public class SummaryGraph {
 			envConfig1.setAllowCreate(true);
 			Environment myDbEnvironment1 = new Environment(new File(dir_index + "/DistanceIndex"), envConfig1);
 
-			// Open the database. Create it if it does not already exist.
 			DatabaseConfig dbConfig1 = new DatabaseConfig();
 			dbConfig1.setAllowCreate(true);
 			Database myDatabase1 = myDbEnvironment1.openDatabase(null, "DistanceIndexDB", dbConfig1);
 
-			System.out.println("loading RDF graph...");
+			/**************** Beginning of loading data ******************/
+
+			System.out.println("loading adjacent list...");
 			InputStream in = new FileInputStream(new File(dir_index + "/graph_adjacent_list.txt"));
 			Reader inr = new InputStreamReader(in);
 			BufferedReader br = new BufferedReader(inr);
@@ -87,13 +76,10 @@ public class SummaryGraph {
 
 			str = br.readLine();
 			NodeNum = Integer.valueOf(str);
-
 			NeighborInfo[][] adjacentList = new NeighborInfo[NodeNum][];
 
-			System.out.println("loading adjacent list...");
 			str = br.readLine();
 			while (str != null) {
-
 				str = str.trim();
 				TermArr = str.split("\t");
 				cur_id = Integer.valueOf(TermArr[0]);
@@ -114,7 +100,7 @@ public class SummaryGraph {
 
 			br.close();
 
-			System.out.println("loading Entity ID Map...");
+			System.out.println("loading entity_id_map...");
 			HashMap<Integer, String> IDEntityMap = new HashMap<Integer, String>();
 			HashMap<String, Integer> EntityIDMap = new HashMap<String, Integer>();
 			byte[] entityTagArr = new byte[NodeNum];
@@ -124,11 +110,10 @@ public class SummaryGraph {
 			BufferedReader br_entity = new BufferedReader(inr_entity);
 
 			str = br_entity.readLine();
-			// entity tag: 1 means entities, 0 means data values
+			// entity tag: 1 means URI, 0 means literal
 			Arrays.fill(entityTagArr, (byte) 0);
 
 			while (str != null) {
-
 				TermArr = str.split("\t");
 				cur_id = Integer.valueOf(TermArr[0]);
 				EntityIDMap.put(TermArr[1], cur_id);
@@ -170,20 +155,21 @@ public class SummaryGraph {
 			/**************** End of loading data ******************/
 
 			System.out.println("begin to process keywords...");
+			Date currentTime1 = new Date();
+
 			String fileStr = args[1];
 			InputStream in1 = new FileInputStream(new File(fileStr));
 			Reader inr1 = new InputStreamReader(in1);
 			BufferedReader br1 = new BufferedReader(inr1);
 
-			System.out.println("keyword file: " + fileStr);
-			Date currentTime1 = new Date();
 			str = br1.readLine();
-			System.out.println("keyword: " + str);
 			TermArr = str.split(";");
 			int[][] visited = new int[TermArr.length][NodeNum];
 			int[][] candidateDist = new int[TermArr.length][NodeNum];
 			byte[] b = null;
 			NeighborInfo[] TermArr2 = null;
+			System.out.println("keyword file: " + fileStr);
+			System.out.println("keyword: " + str);
 
 			String[] keywordArr = new String[TermArr.length];
 			for (int n = 0; n < keywordArr.length; n++) {
@@ -195,8 +181,6 @@ public class SummaryGraph {
 
 				HashSet<Integer> visitedRNSet = new HashSet<Integer>();
 				TreeSet<HeapNode> candidate = new TreeSet<HeapNode>();
-				// ArrayList<Integer> keywordelementslist = new
-				// ArrayList<Integer>();
 
 				Hits hits = null;
 				Query query = null;
@@ -220,7 +204,6 @@ public class SummaryGraph {
 						candidateDist[n][cur_id] = 0;
 
 						candidate.add(curHeapNode);
-
 					}
 
 					while (candidate.size() != 0) {
@@ -235,7 +218,6 @@ public class SummaryGraph {
 							DatabaseEntry theData = new DatabaseEntry();
 
 							if (myDatabase1.get(null, theKey, theData, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
-								// Recreate the data String.
 								b = theData.getData();
 							}
 
@@ -261,7 +243,6 @@ public class SummaryGraph {
 
 						TermArr2 = adjacentList[curHeapNode.VertexID];
 						for (int i = 0; i < TermArr2.length; i++) {
-
 							if (visited[n][TermArr2[i].NeighborID] != Integer.MAX_VALUE)
 								continue;
 							if (entityTagArr[TermArr2[i].NeighborID] == 0)
@@ -289,9 +270,7 @@ public class SummaryGraph {
 							}
 						}
 					}
-
 				}
-
 			}
 
 			System.out.print("candidateDist time:");
@@ -300,10 +279,10 @@ public class SummaryGraph {
 
 			boolean[] isLinked = new boolean[NodeNum];
 			Arrays.fill(isLinked, false);
-			int count = 0;
+			int count = 0, radius = Integer.valueOf(args[2]);
 			for (int n = 0; n < keywordArr.length; n++) {
 				for (int i = 0; i < NodeNum; i++) {
-					if (candidateDist[n][i] < Integer.valueOf(args[2])) {
+					if (candidateDist[n][i] <= radius) {
 						isLinked[i] = true;
 						count++;
 					}
@@ -312,22 +291,28 @@ public class SummaryGraph {
 			System.out.println("total nodes: " + NodeNum);
 			System.out.println("visible nodes to keywords: " + count);
 
+			System.out.println("creating summary graph...");
 			PrintStream out_summary = new PrintStream(new File(dir_index + "/summary.txt"));
 
 			InputStream inFile = new FileInputStream(new File(args[0]));
 			Reader inReader = new InputStreamReader(inFile);
 			BufferedReader inBuffer = new BufferedReader(inReader);
 			str = inBuffer.readLine();
+			Integer node0 = 0, node1 = 0, node2 = 0;
 
-			System.out.println("creating summary graph...");
 			while (str != null) {
 				str = str.trim();
 				str = str.substring(0, str.length() - 1);
 				str = str.trim();
 				TermArr = str.split(" ");
-				if (!(EntityIDMap.containsKey(TermArr[0]) && !isLinked[EntityIDMap.get(TermArr[0])]
-						|| EntityIDMap.containsKey(TermArr[1]) && !isLinked[EntityIDMap.get(TermArr[1])]
-						|| EntityIDMap.containsKey(TermArr[2]) && !isLinked[EntityIDMap.get(TermArr[2])])) {
+
+				node0 = EntityIDMap.get(TermArr[0]);
+				node1 = EntityIDMap.get(TermArr[1]);
+				node2 = EntityIDMap.get(TermArr[2]);
+
+				if ((node0 != null && !isLinked[node0]) || (node1 != null && !isLinked[node1])
+						|| (node2 != null && !isLinked[node2])) {
+				} else {
 					out_summary.println(str);
 				}
 				str = inBuffer.readLine();
@@ -341,9 +326,7 @@ public class SummaryGraph {
 			myDbEnvironment1.close();
 			System.out.println("results can be found at index/summary.txt");
 			System.out.println("finished!");
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

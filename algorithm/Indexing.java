@@ -1,13 +1,8 @@
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -42,27 +37,27 @@ public class Indexing {
 
 	static int amplifier = 1000000;
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
+		if (args.length != 3) {
+			System.out.println("usage:");
+			System.out.println("================");
+			System.out.println(
+					"java -classpath algo.jar Indexing <data file location> <pivot number> <0/1 if need structrual index>");
+			System.out.println("");
+			System.out.println("generating structrual index can be very long for huge data!");
+			System.out.println("structrual index is only necessary for query answering!");
+			System.out.println("");
+			System.out.println("for example,");
+			System.out.println("java -classpath algo.jar Indexing data/persons.nt 200 0");
+			System.exit(0);
+		}
 		try {
 			String str = "";
-			int count = 0;
+			String dir_index = "index";
 			String[] TermArr;
-			if (args.length != 3) {
-				System.out.println("usage:");
-				System.out.println("================");
-				System.out.println(
-						"java -classpath algo.jar Indexing <data file location> <pivot number> <0/1 if need structrual index>");
-				System.out.println("");
-				System.out.println("generating structrual index can be very long for huge data!");
-				System.out.println("structrual index is only necessary for query answering!");
-				System.out.println("for example,");
-				System.out.println("java -classpath algo.jar Indexing data/persons.nt 200 0");
-				System.exit(0);
-			}
-
 			int PivotNum = Integer.valueOf(args[1]);
 
-			String dir_index = "index";
 			File file = new File(dir_index);
 			if (!file.exists()) {
 				file.mkdirs();
@@ -84,7 +79,6 @@ public class Indexing {
 			envConfig1.setAllowCreate(true);
 			Environment myDbEnvironment1 = new Environment(new File(dir_index + "/DistanceIndex"), envConfig1);
 
-			// Open the database. Create it if it does not already exist.
 			DatabaseConfig dbConfig1 = new DatabaseConfig();
 			dbConfig1.setAllowCreate(true);
 			Database myDatabase1 = myDbEnvironment1.openDatabase(null, "DistanceIndexDB", dbConfig1);
@@ -93,21 +87,18 @@ public class Indexing {
 			envConfig2.setAllowCreate(true);
 			Environment myDbEnvironment2 = new Environment(new File(dir_index + "/StructuralIndex"), envConfig2);
 
-			// Open the database. Create it if it does not already exist.
 			DatabaseConfig dbConfig2 = new DatabaseConfig();
 			dbConfig2.setAllowCreate(true);
 			Database myDatabase2 = myDbEnvironment2.openDatabase(null, "StructuralIndexDB", dbConfig2);
 
-			// ==============================================================
-			// input file arg[0]
 			InputStream inFile = new FileInputStream(new File(args[0]));
 			Reader inReader = new InputStreamReader(inFile);
 			BufferedReader inBuffer = new BufferedReader(inReader);
 
 			int head_id = 0, tail_id = 0, label_id = 0, cur_id = 0, NodeNum = 0, p_id = 0;
+			String objStr = "";
 			ArrayList<ArrayList<NeighborInfo>> adjacentList1 = new ArrayList<ArrayList<NeighborInfo>>();
 			ArrayList<NeighborInfo> curList = new ArrayList<NeighborInfo>();
-			String objStr = "";
 			TreeMap<String, Integer> EntityIDMap = new TreeMap<String, Integer>();
 			HashMap<Integer, String> IDEntityMap = new HashMap<Integer, String>();
 			TreeMap<String, Integer> PredicateIDMap = new TreeMap<String, Integer>();
@@ -116,12 +107,8 @@ public class Indexing {
 			TreeMap<Integer, TreeSet<Integer>> predicateSalienceBackwardMap = new TreeMap<Integer, TreeSet<Integer>>();
 
 			str = inBuffer.readLine();
-			count = 0;
-
 			System.out.println("load RDF data, genenerate inverted index...");
 			while (str != null) {
-				count++;
-
 				str = str.trim();
 				str = str.substring(0, str.length() - 1);
 				str = str.trim();
@@ -184,10 +171,7 @@ public class Indexing {
 			Arrays.fill(entityLiteralArr, "");
 
 			str = br.readLine();
-			count = 0;
 			while (str != null) {
-				count++;
-
 				str = str.trim();
 				str = str.substring(0, str.length() - 1);
 				str = str.trim();
@@ -230,15 +214,13 @@ public class Indexing {
 			indexWriter.optimize();
 			indexWriter.close();
 
+			System.out.println("writing entity_id_map...");
 			PrintStream out_entity = new PrintStream(new File(dir_index + "/entity_id_map.txt"));
 			Iterator<Entry<String, Integer>> iter32 = EntityIDMap.entrySet().iterator();
 			byte[] entityTagArr = new byte[NodeNum];
 			Arrays.fill(entityTagArr, (byte) 0);
 
-			count = 0;
 			while (iter32.hasNext()) {
-				count++;
-
 				Entry<String, Integer> e = iter32.next();
 				cur_id = e.getValue();
 				str = e.getKey();
@@ -248,20 +230,17 @@ public class Indexing {
 					entityTagArr[cur_id] = 1;
 				}
 			}
-
 			out_entity.flush();
 			out_entity.close();
 
+			System.out.println("writing predicate weights...");
 			PrintStream out_p_weight = new PrintStream(new File(dir_index + "/p_weight.txt"));
 			Iterator<Entry<Integer, TreeSet<Integer>>> iter82 = predicateSalienceBackwardMap.entrySet().iterator();
 			int item_id = 0;
 			TreeMap<Integer, ItemInfo> IDItemMap = new TreeMap<Integer, ItemInfo>();
 			TreeMap<Integer, Integer> LabelItemPosMap = new TreeMap<Integer, Integer>();
 
-			count = 0;
 			while (iter82.hasNext()) {
-				count++;
-
 				Entry<Integer, TreeSet<Integer>> e = iter82.next();
 				p_id = e.getKey();
 
@@ -288,10 +267,10 @@ public class Indexing {
 					item_id = item_id + 6;
 				}
 			}
-
 			out_p_weight.flush();
 			out_p_weight.close();
 
+			System.out.println("writing adjacences and transactions...");
 			PrintStream out_adjacent_list = new PrintStream(new File(dir_index + "/graph_adjacent_list.txt"));
 			PrintStream out_transaction = new PrintStream(new File(dir_index + "/multi_transaction_set.txt"));
 
@@ -337,23 +316,15 @@ public class Indexing {
 							}
 							if (label_count >= 2) {
 								if (adjacentList[cur_id][i - 1].Direction == 0) {
-									// out_transaction.print("item" + (tmp_item
-									// + 1) + " ");
 									out_transaction_list.add(tmp_item + 1);
 								} else {
-									// out_transaction.print("item" + (tmp_item
-									// + 4) + " ");
 									out_transaction_list.add(tmp_item + 4);
 								}
 							}
 							if (label_count >= 3) {
 								if (adjacentList[cur_id][i - 1].Direction == 0) {
-									// out_transaction.print("item" + (tmp_item
-									// + 2) + " ");
 									out_transaction_list.add(tmp_item + 2);
 								} else {
-									// out_transaction.print("item" + (tmp_item
-									// + 5) + " ");
 									out_transaction_list.add(tmp_item + 5);
 								}
 							}
@@ -367,30 +338,27 @@ public class Indexing {
 				}
 
 				int tmp_item = LabelItemPosMap.get(adjacentList[cur_id][adjacentList[cur_id].length - 1].Label);
+
 				if (label_count >= 1) {
 					if (adjacentList[cur_id][adjacentList[cur_id].length - 1].Direction == 0) {
-						// out_transaction.print("item" + (tmp_item + 0) + " ");
 						out_transaction_list.add(tmp_item + 0);
 					} else {
-						// out_transaction.print("item" + (tmp_item + 3) + " ");
 						out_transaction_list.add(tmp_item + 3);
 					}
 				}
+
 				if (label_count >= 2) {
 					if (adjacentList[cur_id][adjacentList[cur_id].length - 1].Direction == 0) {
-						// out_transaction.print("item" + (tmp_item + 1) + " ");
 						out_transaction_list.add(tmp_item + 1);
 					} else {
-						// out_transaction.print("item" + (tmp_item + 4) + " ");
 						out_transaction_list.add(tmp_item + 4);
 					}
 				}
+
 				if (label_count >= 3) {
 					if (adjacentList[cur_id][adjacentList[cur_id].length - 1].Direction == 0) {
-						// out_transaction.print("item" + (tmp_item + 2) + " ");
 						out_transaction_list.add(tmp_item + 2);
 					} else {
-						// out_transaction.print("item" + (tmp_item + 5) + " ");
 						out_transaction_list.add(tmp_item + 5);
 					}
 				}
@@ -425,7 +393,7 @@ public class Indexing {
 				if (NodeNum < 1000) {
 					support_delta = NodeNum / 10;
 				}
-				// System.out.println(NodeNum);
+				System.out.println("node number: " + NodeNum);
 
 				Process prc = Runtime.getRuntime()
 						.exec("./fp_growth.exe -f " + dir_index + "/multi_transaction_set.txt -o " + dir_index
@@ -451,7 +419,6 @@ public class Indexing {
 				int cur_frequency = 0;
 
 				str = br70.readLine();
-				count = 0;
 				while (str != null) {
 					TermArr = str.split(":");
 
@@ -515,6 +482,7 @@ public class Indexing {
 										|| adjacentList[j][i].Direction != adjacentList[j][i - 1].Direction) {
 
 									int tmp_item = LabelItemPosMap.get(adjacentList[j][i - 1].Label);
+
 									if (label_count >= 1) {
 										if (adjacentList[j][i - 1].Direction == 0) {
 											if (ItemFPListMap.containsKey(tmp_item)) {
@@ -532,6 +500,7 @@ public class Indexing {
 											}
 										}
 									}
+
 									if (label_count >= 2) {
 										if (adjacentList[j][i - 1].Direction == 0) {
 											if (ItemFPListMap.containsKey(tmp_item + 1)) {
@@ -549,6 +518,7 @@ public class Indexing {
 											}
 										}
 									}
+
 									if (label_count >= 3) {
 										if (adjacentList[j][i - 1].Direction == 0) {
 											if (ItemFPListMap.containsKey(tmp_item + 2)) {
@@ -626,24 +596,19 @@ public class Indexing {
 								}
 							}
 						}
-
-						// ==================================================================
 					}
 				}
 
 				for (int i = 0; i < fpList.size(); i++) {
-					// out_fp_list.println(fpList.get(i).FPStr + "\t"
-					// + fpList.get(i).MatchingList.toString());
 					String aKey2 = fpList.get(i).getFPStr() + "\t";
 					byte[] aData2 = intArrayToBytes(fpList.get(i).MatchingList);
 
 					DatabaseEntry theKey2 = new DatabaseEntry(aKey2.getBytes("UTF-8"));
 					DatabaseEntry theData2 = new DatabaseEntry(aData2);
 					myDatabase2.put(null, theKey2, theData2);
-
 				}
 				Date starIndexEndTime = new Date();
-				System.out.println("structural index take "
+				System.out.println("structural index takes "
 						+ (starIndexEndTime.getTime() - starIndexStartTime.getTime()) + " ms.");
 			}
 
@@ -669,9 +634,6 @@ public class Indexing {
 
 			PrintStream out_pivot = new PrintStream(new File(dir_index + "/pivot.txt"));
 			for (int j = 0; j < PivotNum; j++) {
-				// PrintStream out = new PrintStream(new File(dir_index
-				// + "/Pivots/" + pivotArr[pivotArr.length - 1 - j].key));
-
 				int sourceID = pivotArr[pivotArr.length - 1 - j].key;
 
 				if (entityTagArr[sourceID] == 0) {
@@ -682,14 +644,13 @@ public class Indexing {
 				out_pivot.println(
 						pivotArr[pivotArr.length - 1 - j].key + "\t" + pivotArr[pivotArr.length - 1 - j].value + "\t");
 				cur_id = 0;
-				int visited_num = 0, cur_dist = 0;
+				int cur_dist = 0;
 				for (int i = 0; i < visited.length; i++) {
 					visited[i] = -1;
 					candidateDist[i] = -1;
 				}
 
 				visited[sourceID] = 0;
-				visited_num++;
 				for (int i = 0; i < adjacentList[sourceID].length; i++) {
 					HeapNode curHeapNode = new HeapNode(adjacentList[sourceID][i].NeighborID);
 					curHeapNode.Dist = adjacentList[sourceID][i].Distance;
@@ -700,10 +661,8 @@ public class Indexing {
 				while (candidate.size() != 0) {
 					HeapNode curHeapNode = candidate.pollFirst();
 					visited[curHeapNode.VertexID] = (byte) curHeapNode.Dist;
-					visited_num++;
 
 					for (int i = 0; i < adjacentList[curHeapNode.VertexID].length; i++) {
-						// int w = TermArr2[i];
 						if (visited[adjacentList[curHeapNode.VertexID][i].NeighborID] != -1)
 							continue;
 						if (entityTagArr[adjacentList[curHeapNode.VertexID][i].NeighborID] == 0)
@@ -734,7 +693,6 @@ public class Indexing {
 					}
 				}
 
-				// out.print(Arrays.toString(visited));
 				String aKey1 = "" + pivotArr[pivotArr.length - 1 - j].key;
 
 				DatabaseEntry theKey1 = new DatabaseEntry(aKey1.getBytes("UTF-8"));
@@ -752,12 +710,10 @@ public class Indexing {
 
 			Date pivotEndTime = new Date();
 			System.out.println(
-					"distanced-based index take " + (pivotEndTime.getTime() - pivotStartTime.getTime()) + " ms.");
+					"distanced-based index takes " + (pivotEndTime.getTime() - pivotStartTime.getTime()) + " ms.");
 
 			System.out.println("finished!");
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -775,7 +731,6 @@ public class Indexing {
 				offset += 8;
 			}
 		}
-
 		return b;
 	}
 }

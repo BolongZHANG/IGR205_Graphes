@@ -1,6 +1,5 @@
 package utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ResultInfo implements Comparable<ResultInfo> {
@@ -10,7 +9,7 @@ public class ResultInfo implements Comparable<ResultInfo> {
 	public int len;
 	public int[] scoreArr;
 	public int upbound;
-	public int pos;// pos������ʾ��ǰ���е���Query�ĵ�pos����
+	public int pos;
 	public int[] path;
 
 	public ResultInfo(int len, int pos, int num) {
@@ -26,7 +25,6 @@ public class ResultInfo implements Comparable<ResultInfo> {
 		Arrays.fill(this.matchArr, -1);
 		Arrays.fill(this.scoreArr, Integer.MAX_VALUE);
 		Arrays.fill(this.path, Integer.MAX_VALUE);
-
 	}
 
 	public ResultInfo(ResultInfo tempResultInfo, int pos2) {
@@ -62,15 +60,12 @@ public class ResultInfo implements Comparable<ResultInfo> {
 		int temp_score = this.getScore() - o.getScore();
 		if (temp_score != 0)
 			return temp_score;
-		return Arrays.toString(this.matchArr).compareTo(
-				Arrays.toString(o.matchArr));
+		return Arrays.toString(this.matchArr).compareTo(Arrays.toString(o.matchArr));
 	}
 
 	@Override
 	public String toString() {
-		return "ResultInfo [matchArr=" + Arrays.toString(matchArr)
-				// + ", scoreArr=" + Arrays.toString(scoreArr)
-				+ ", socre=" + this.getScore() + ", path="
+		return "ResultInfo [matchArr=" + Arrays.toString(matchArr) + ", socre=" + this.getScore() + ", path="
 				+ Arrays.toString(this.path) + "]";
 	}
 
@@ -81,9 +76,4 @@ public class ResultInfo implements Comparable<ResultInfo> {
 		}
 		return false;
 	}
-
-	// public void addPathNode(int e) {
-	// this.path.add(e);
-	// }
-
 }
