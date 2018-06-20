@@ -47,7 +47,19 @@ public class Indexing {
 			String str = "";
 			int count = 0;
 			String[] TermArr;
-			// default 100 pivot
+			if (args.length != 3) {
+				System.out.println("usage:");
+				System.out.println("================");
+				System.out.println(
+						"java -classpath algo.jar Indexing <data file location> <pivot number> <0/1 if need structrual index>");
+				System.out.println("");
+				System.out.println("generating structrual index can be very long for huge data!");
+				System.out.println("structrual index is only necessary for query answering!");
+				System.out.println("for example,");
+				System.out.println("java -classpath algo.jar Indexing data/persons.nt 200 0");
+				System.exit(0);
+			}
+
 			int PivotNum = Integer.valueOf(args[1]);
 
 			String dir_index = "index";
@@ -406,232 +418,237 @@ public class Indexing {
 
 			adjacentList1.clear();
 
-			System.out.println("genenerate the structural index...");
-			Date starIndexStartTime = new Date();
-			int support_delta = NodeNum / 100;
-			if (NodeNum < 1000) {
-				support_delta = NodeNum / 10;
-			}
-			// System.out.println(NodeNum);
+			if (Integer.valueOf(args[2]) == 1) {
+				System.out.println("genenerate the structural index...");
+				Date starIndexStartTime = new Date();
+				int support_delta = NodeNum / 100;
+				if (NodeNum < 1000) {
+					support_delta = NodeNum / 10;
+				}
+				// System.out.println(NodeNum);
 
-			Process prc = Runtime.getRuntime()
-					.exec("utils/fp_growth/fp_growth.exe -f " + dir_index + "/multi_transaction_set.txt -o " + dir_index
-							+ "/fp.out -s " + support_delta + " -t " + NodeNum + " -i " + IDItemMap.size() + " -w "
-							+ max_item_count);
+				Process prc = Runtime.getRuntime()
+						.exec("./fp_growth.exe -f " + dir_index + "/multi_transaction_set.txt -o " + dir_index
+								+ "/fp.out -s " + support_delta + " -t " + NodeNum + " -i " + IDItemMap.size() + " -w "
+								+ max_item_count);
 
-			BufferedReader br_prc = new BufferedReader(new InputStreamReader(prc.getInputStream()));
-			String line = null;
-			while ((line = br_prc.readLine()) != null) {
-				System.out.println(line);
-			}
-
-			prc.waitFor();
-			
-			System.out.println("parsing fp.out......");
-			InputStream in70 = new FileInputStream(new File(dir_index + "/fp.out"));
-			Reader inr70 = new InputStreamReader(in70);
-			BufferedReader br70 = new BufferedReader(inr70);
-			TreeSet<Integer> frequentPropertySet = new TreeSet<Integer>();
-			TreeSet<Integer> frequentItemSet = new TreeSet<Integer>();
-			TreeMap<Integer, ArrayList<Integer>> ItemFPListMap = new TreeMap<Integer, ArrayList<Integer>>();
-			ArrayList<FPInfo> fpList = new ArrayList<FPInfo>();
-			int cur_frequency = 0;
-
-			str = br70.readLine();
-			count = 0;
-			while (str != null) {
-				TermArr = str.split(":");
-
-				String[] TermArr1 = TermArr[0].split(" ");
-				TreeSet<Integer> curItemSet = new TreeSet<Integer>();
-				for (int i = 0; i < TermArr1.length; i++) {
-					TermArr1[i] = TermArr1[i].trim();
-					item_id = Integer.valueOf(TermArr1[i]);
-					ItemInfo curItem = IDItemMap.get(item_id);
-					frequentPropertySet.add(curItem.Label);
-					frequentItemSet.add(item_id);
-
-					curItemSet.add(item_id);
+				BufferedReader br_prc = new BufferedReader(new InputStreamReader(prc.getInputStream()));
+				String line = null;
+				while ((line = br_prc.readLine()) != null) {
+					System.out.println(line);
 				}
 
-				TermArr[1] = TermArr[1].trim();
-				cur_frequency = Integer.valueOf(TermArr[1]);
+				prc.waitFor();
 
-				FPInfo newFP = new FPInfo(curItemSet, cur_frequency);
-
-				if (fpList.size() == 0) {
-					fpList.add(newFP);
-				} else {
-					int fp_tag = 0;
-					for (int i = fpList.size() - 1; i >= 0; i--) {
-						if (newFP.isSubFP(fpList.get(i))) {
-							fp_tag = 1;
-							break;
-						}
-					}
-					if (fp_tag == 0) {
-						fpList.add(newFP);
-					}
-				}
+				System.out.println("parsing fp.out......");
+				InputStream in70 = new FileInputStream(new File(dir_index + "/fp.out"));
+				Reader inr70 = new InputStreamReader(in70);
+				BufferedReader br70 = new BufferedReader(inr70);
+				TreeSet<Integer> frequentPropertySet = new TreeSet<Integer>();
+				TreeSet<Integer> frequentItemSet = new TreeSet<Integer>();
+				TreeMap<Integer, ArrayList<Integer>> ItemFPListMap = new TreeMap<Integer, ArrayList<Integer>>();
+				ArrayList<FPInfo> fpList = new ArrayList<FPInfo>();
+				int cur_frequency = 0;
 
 				str = br70.readLine();
-			}
+				count = 0;
+				while (str != null) {
+					TermArr = str.split(":");
 
-			br70.close();
+					String[] TermArr1 = TermArr[0].split(" ");
+					TreeSet<Integer> curItemSet = new TreeSet<Integer>();
+					for (int i = 0; i < TermArr1.length; i++) {
+						TermArr1[i] = TermArr1[i].trim();
+						item_id = Integer.valueOf(TermArr1[i]);
+						ItemInfo curItem = IDItemMap.get(item_id);
+						frequentPropertySet.add(curItem.Label);
+						frequentItemSet.add(item_id);
 
-			for (int i = 0; i < fpList.size(); i++) {
-				int[] curItemArr = fpList.get(i).getItemArr();
-
-				for (int j = 0; j < curItemArr.length; j++) {
-					if (!ItemFPListMap.containsKey(curItemArr[j])) {
-						ItemFPListMap.put(curItemArr[j], new ArrayList<Integer>());
+						curItemSet.add(item_id);
 					}
-					ItemFPListMap.get(curItemArr[j]).add(i);
+
+					TermArr[1] = TermArr[1].trim();
+					cur_frequency = Integer.valueOf(TermArr[1]);
+
+					FPInfo newFP = new FPInfo(curItemSet, cur_frequency);
+
+					if (fpList.size() == 0) {
+						fpList.add(newFP);
+					} else {
+						int fp_tag = 0;
+						for (int i = fpList.size() - 1; i >= 0; i--) {
+							if (newFP.isSubFP(fpList.get(i))) {
+								fp_tag = 1;
+								break;
+							}
+						}
+						if (fp_tag == 0) {
+							fpList.add(newFP);
+						}
+					}
+
+					str = br70.readLine();
 				}
-			}
 
-			int label_count = 0;
+				br70.close();
 
-			for (int j = 0; j < NodeNum; j++) {
+				for (int i = 0; i < fpList.size(); i++) {
+					int[] curItemArr = fpList.get(i).getItemArr();
 
-				if (adjacentList[j] != null) {
-					label_count = 1;
-					for (int i = 0; i < adjacentList[j].length; i++) {
-						if (i > 0) {
-							if (adjacentList[j][i].Label != adjacentList[j][i - 1].Label
-									|| adjacentList[j][i].Direction != adjacentList[j][i - 1].Direction) {
+					for (int j = 0; j < curItemArr.length; j++) {
+						if (!ItemFPListMap.containsKey(curItemArr[j])) {
+							ItemFPListMap.put(curItemArr[j], new ArrayList<Integer>());
+						}
+						ItemFPListMap.get(curItemArr[j]).add(i);
+					}
+				}
 
-								int tmp_item = LabelItemPosMap.get(adjacentList[j][i - 1].Label);
-								if (label_count >= 1) {
-									if (adjacentList[j][i - 1].Direction == 0) {
-										if (ItemFPListMap.containsKey(tmp_item)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+				int label_count = 0;
+
+				for (int j = 0; j < NodeNum; j++) {
+
+					if (adjacentList[j] != null) {
+						label_count = 1;
+						for (int i = 0; i < adjacentList[j].length; i++) {
+							if (i > 0) {
+								if (adjacentList[j][i].Label != adjacentList[j][i - 1].Label
+										|| adjacentList[j][i].Direction != adjacentList[j][i - 1].Direction) {
+
+									int tmp_item = LabelItemPosMap.get(adjacentList[j][i - 1].Label);
+									if (label_count >= 1) {
+										if (adjacentList[j][i - 1].Direction == 0) {
+											if (ItemFPListMap.containsKey(tmp_item)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
 											}
-										}
-									} else {
-										if (ItemFPListMap.containsKey(tmp_item + 3)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 3);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+										} else {
+											if (ItemFPListMap.containsKey(tmp_item + 3)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 3);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
 											}
 										}
 									}
-								}
-								if (label_count >= 2) {
-									if (adjacentList[j][i - 1].Direction == 0) {
-										if (ItemFPListMap.containsKey(tmp_item + 1)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 1);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									if (label_count >= 2) {
+										if (adjacentList[j][i - 1].Direction == 0) {
+											if (ItemFPListMap.containsKey(tmp_item + 1)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 1);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
 											}
-										}
-									} else {
-										if (ItemFPListMap.containsKey(tmp_item + 4)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 4);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-											}
-										}
-									}
-								}
-								if (label_count >= 3) {
-									if (adjacentList[j][i - 1].Direction == 0) {
-										if (ItemFPListMap.containsKey(tmp_item + 2)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 2);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-											}
-										}
-									} else {
-										if (ItemFPListMap.containsKey(tmp_item + 5)) {
-											ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 5);
-											for (int k = 0; k < tmp_pos_list.size(); k++) {
-												fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+										} else {
+											if (ItemFPListMap.containsKey(tmp_item + 4)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 4);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
 											}
 										}
 									}
-								}
+									if (label_count >= 3) {
+										if (adjacentList[j][i - 1].Direction == 0) {
+											if (ItemFPListMap.containsKey(tmp_item + 2)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 2);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
+											}
+										} else {
+											if (ItemFPListMap.containsKey(tmp_item + 5)) {
+												ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 5);
+												for (int k = 0; k < tmp_pos_list.size(); k++) {
+													fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+												}
+											}
+										}
+									}
 
-								label_count = 1;
+									label_count = 1;
+								} else {
+									label_count++;
+								}
+							}
+						}
+
+						int tmp_item = LabelItemPosMap.get(adjacentList[j][adjacentList[j].length - 1].Label);
+						if (label_count >= 1) {
+							if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
+								if (ItemFPListMap.containsKey(tmp_item)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
 							} else {
-								label_count++;
+								if (ItemFPListMap.containsKey(tmp_item + 3)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 3);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
 							}
 						}
-					}
+						if (label_count >= 2) {
+							if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
+								if (ItemFPListMap.containsKey(tmp_item + 1)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 1);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
+							} else {
+								if (ItemFPListMap.containsKey(tmp_item + 4)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 4);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
+							}
+						}
+						if (label_count >= 3) {
+							if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
+								if (ItemFPListMap.containsKey(tmp_item + 2)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 2);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
+							} else {
+								if (ItemFPListMap.containsKey(tmp_item + 5)) {
+									ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 5);
+									for (int k = 0; k < tmp_pos_list.size(); k++) {
+										fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
+									}
+								}
+							}
+						}
 
-					int tmp_item = LabelItemPosMap.get(adjacentList[j][adjacentList[j].length - 1].Label);
-					if (label_count >= 1) {
-						if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
-							if (ItemFPListMap.containsKey(tmp_item)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						} else {
-							if (ItemFPListMap.containsKey(tmp_item + 3)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 3);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						}
+						// ==================================================================
 					}
-					if (label_count >= 2) {
-						if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
-							if (ItemFPListMap.containsKey(tmp_item + 1)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 1);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						} else {
-							if (ItemFPListMap.containsKey(tmp_item + 4)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 4);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						}
-					}
-					if (label_count >= 3) {
-						if (adjacentList[j][adjacentList[j].length - 1].Direction == 0) {
-							if (ItemFPListMap.containsKey(tmp_item + 2)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 2);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						} else {
-							if (ItemFPListMap.containsKey(tmp_item + 5)) {
-								ArrayList<Integer> tmp_pos_list = ItemFPListMap.get(tmp_item + 5);
-								for (int k = 0; k < tmp_pos_list.size(); k++) {
-									fpList.get(tmp_pos_list.get(k)).MatchingList.add(j);
-								}
-							}
-						}
-					}
-
-					// ==================================================================
 				}
+
+				for (int i = 0; i < fpList.size(); i++) {
+					// out_fp_list.println(fpList.get(i).FPStr + "\t"
+					// + fpList.get(i).MatchingList.toString());
+					String aKey2 = fpList.get(i).getFPStr() + "\t";
+					byte[] aData2 = intArrayToBytes(fpList.get(i).MatchingList);
+
+					DatabaseEntry theKey2 = new DatabaseEntry(aKey2.getBytes("UTF-8"));
+					DatabaseEntry theData2 = new DatabaseEntry(aData2);
+					myDatabase2.put(null, theKey2, theData2);
+
+				}
+				Date starIndexEndTime = new Date();
+				System.out.println("structural index take "
+						+ (starIndexEndTime.getTime() - starIndexStartTime.getTime()) + " ms.");
 			}
 
-			for (int i = 0; i < fpList.size(); i++) {
-				// out_fp_list.println(fpList.get(i).FPStr + "\t"
-				// + fpList.get(i).MatchingList.toString());
-				String aKey2 = fpList.get(i).getFPStr() + "\t";
-				byte[] aData2 = intArrayToBytes(fpList.get(i).MatchingList);
-
-				DatabaseEntry theKey2 = new DatabaseEntry(aKey2.getBytes("UTF-8"));
-				DatabaseEntry theData2 = new DatabaseEntry(aData2);
-				myDatabase2.put(null, theKey2, theData2);
-
-			}
-			Date starIndexEndTime = new Date();
 			Date pivotStartTime = new Date();
-			System.out.println("starting to " + "genenerate the distance-based index...");
+			System.out.println("genenerate the distance-based index...");
 
 			KeyValuePair[] pivotArr = new KeyValuePair[NodeNum];
 			for (int k = 0; k < NodeNum; k++) {
@@ -727,25 +744,18 @@ public class Indexing {
 			}
 			out_pivot.flush();
 			out_pivot.close();
-			
 
 			myDatabase1.close();
 			myDbEnvironment1.close();
 			myDatabase2.close();
 			myDbEnvironment2.close();
-			
+
 			Date pivotEndTime = new Date();
 			System.out.println(
 					"distanced-based index take " + (pivotEndTime.getTime() - pivotStartTime.getTime()) + " ms.");
-			System.out.println(
-					"structural index take " + (starIndexEndTime.getTime() - starIndexStartTime.getTime()) + " ms.");
 
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("finished!");
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

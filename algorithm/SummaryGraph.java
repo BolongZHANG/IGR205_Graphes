@@ -53,6 +53,17 @@ public class SummaryGraph {
 			int cur_id = 0;
 			String[] TermArr, TermArr1;
 
+			if (args.length != 3) {
+				System.out.println("usage:");
+				System.out.println("================");
+				System.out.println(
+						"java -classpath algo.jar SummaryGraph <original graph location> <keyword file location> <graph radius>");
+				System.out.println("");
+				System.out.println("for example,");
+				System.out.println("java -classpath algo.jar SummaryGraph data/persons.nt data/sembib_Q1.txt 20");
+				System.exit(0);
+			}
+
 			String dir_index = "index";
 
 			Date loadingStartTime = new Date();
@@ -152,103 +163,6 @@ public class SummaryGraph {
 			}
 			br175.close();
 
-			System.out.println("loading structural index ...");
-			InputStream in650 = new FileInputStream(new File(dir_index + "/p_weight.txt"));
-			Reader inr650 = new InputStreamReader(in650);
-			BufferedReader br650 = new BufferedReader(inr650);
-
-			TreeMap<String, Integer> PredicateIDMap = new TreeMap<String, Integer>();
-			TreeMap<Integer, String> IDPredicateMap = new TreeMap<Integer, String>();
-			TreeMap<Integer, ItemInfo> IDItemMap = new TreeMap<Integer, ItemInfo>();
-			TreeMap<Integer, Integer> LabelItemPosMap = new TreeMap<Integer, Integer>();
-			int item_id = 0, p_id = 0;
-
-			str = br650.readLine();
-			while (str != null) {
-				TermArr = str.split(" ");
-
-				PredicateIDMap.put(TermArr[0], Integer.valueOf(TermArr[1]));
-				IDPredicateMap.put(Integer.valueOf(TermArr[1]), TermArr[0]);
-
-				p_id = Integer.valueOf(TermArr[1]);
-				LabelItemPosMap.put(p_id, item_id);
-
-				IDItemMap.put(item_id, new ItemInfo(p_id, 0, 1));
-				IDItemMap.put((item_id + 1), new ItemInfo(p_id, 0, 2));
-				IDItemMap.put((item_id + 2), new ItemInfo(p_id, 0, 3));
-
-				IDItemMap.put((item_id + 3), new ItemInfo(p_id, 1, 1));
-				IDItemMap.put((item_id + 4), new ItemInfo(p_id, 1, 2));
-				IDItemMap.put((item_id + 5), new ItemInfo(p_id, 1, 3));
-
-				item_id = item_id + 6;
-
-				str = br650.readLine();
-			}
-
-			br650.close();
-
-			InputStream in70 = new FileInputStream(new File(dir_index + "/fp.out"));
-			Reader inr70 = new InputStreamReader(in70);
-			BufferedReader br70 = new BufferedReader(inr70);
-			TreeSet<Integer> frequentPropertySet = new TreeSet<Integer>();
-			TreeSet<Integer> frequentItemSet = new TreeSet<Integer>();
-			TreeMap<Integer, ArrayList<Integer>> ItemFPListMap = new TreeMap<Integer, ArrayList<Integer>>();
-			ArrayList<FPInfo> fpList = new ArrayList<FPInfo>();
-			int cur_frequency = 0;
-
-			str = br70.readLine();
-			while (str != null) {
-				TermArr = str.split(":");
-
-				TermArr1 = TermArr[0].split(" ");
-				TreeSet<Integer> curItemSet = new TreeSet<Integer>();
-				for (int i = 0; i < TermArr1.length; i++) {
-					TermArr1[i] = TermArr1[i].trim();
-					item_id = Integer.valueOf(TermArr1[i]);
-					ItemInfo curItem = IDItemMap.get(item_id);
-					frequentPropertySet.add(curItem.Label);
-					frequentItemSet.add(item_id);
-
-					curItemSet.add(item_id);
-				}
-
-				TermArr[1] = TermArr[1].trim();
-				cur_frequency = Integer.valueOf(TermArr[1]);
-
-				FPInfo newFP = new FPInfo(curItemSet, cur_frequency);
-
-				if (fpList.size() == 0) {
-					fpList.add(newFP);
-				} else {
-					int fp_tag = 0;
-					for (int i = fpList.size() - 1; i >= 0; i--) {
-						if (newFP.isSubFP(fpList.get(i))) {
-							fp_tag = 1;
-							break;
-						}
-					}
-					if (fp_tag == 0) {
-						fpList.add(newFP);
-					}
-				}
-
-				str = br70.readLine();
-			}
-
-			br70.close();
-
-			for (int i = 0; i < fpList.size(); i++) {
-				int[] curItemArr = fpList.get(i).getItemArr();
-
-				for (int j = 0; j < curItemArr.length; j++) {
-					if (!ItemFPListMap.containsKey(curItemArr[j])) {
-						ItemFPListMap.put(curItemArr[j], new ArrayList<Integer>());
-					}
-					ItemFPListMap.get(curItemArr[j]).add(i);
-				}
-			}
-
 			Date loadingEndTime = new Date();
 			System.out.print("loading time:");
 			System.out.println(loadingEndTime.getTime() - loadingStartTime.getTime() + "ms");
@@ -261,12 +175,11 @@ public class SummaryGraph {
 			Reader inr1 = new InputStreamReader(in1);
 			BufferedReader br1 = new BufferedReader(inr1);
 
-			System.out.println(fileStr);
+			System.out.println("keyword file: " + fileStr);
 			Date currentTime1 = new Date();
 			str = br1.readLine();
-			System.out.println(str);
+			System.out.println("keyword: " + str);
 			TermArr = str.split(";");
-			System.out.println(TermArr.length);
 			int[][] visited = new int[TermArr.length][NodeNum];
 			int[][] candidateDist = new int[TermArr.length][NodeNum];
 			byte[] b = null;
@@ -381,7 +294,7 @@ public class SummaryGraph {
 
 			}
 
-			System.out.print("keyword Dijkstra time:");
+			System.out.print("candidateDist time:");
 			Date currentTime2 = new Date();
 			System.out.println(currentTime2.getTime() - currentTime1.getTime());
 
@@ -426,6 +339,7 @@ public class SummaryGraph {
 			br1.close();
 			myDatabase1.close();
 			myDbEnvironment1.close();
+			System.out.println("results can be found at index/summary.txt");
 			System.out.println("finished!");
 
 		} catch (Exception e) {

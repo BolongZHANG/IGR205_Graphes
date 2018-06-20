@@ -64,6 +64,16 @@ public class SparqlQuery {
 			int cur_id = 0;
 			String[] TermArr, TermArr1;
 
+			if (args.length != 2) {
+				System.out.println("usage:");
+				System.out.println("================");
+				System.out.println("java -classpath algo.jar SparqlQuery <keyword+query file location> <top k>");
+				System.out.println("");
+				System.out.println("for example,");
+				System.out.println("java -classpath algo.jar SparqlQuery data/sembib_Q1.txt 10");
+				System.exit(0);
+			}
+
 			String dir_index = "index";
 			int TopKNum = Integer.valueOf(args[1]);
 
@@ -277,7 +287,7 @@ public class SparqlQuery {
 			Date loadingEndTime = new Date();
 			System.out.print("loading time:");
 			System.out.println(loadingEndTime.getTime() - loadingStartTime.getTime() + "ms");
-			
+
 			/**************** End of loading data ******************/
 
 			System.out.println("begin to process query...");
@@ -286,12 +296,11 @@ public class SparqlQuery {
 			Reader inr1 = new InputStreamReader(in1);
 			BufferedReader br1 = new BufferedReader(inr1);
 
-			System.out.println(fileStr);
+			System.out.println("file location: " + fileStr);
 			Date currentTime1 = new Date();
 			str = br1.readLine();
-			System.out.println(str);
+			System.out.println("keyword: " + str);
 			TermArr = str.split(";");
-			System.out.println(TermArr.length);
 			int[][] visited = new int[TermArr.length][NodeNum];
 			int[][] candidateDist = new int[TermArr.length][NodeNum];
 			byte[] b = null;
@@ -409,7 +418,7 @@ public class SparqlQuery {
 
 			}
 
-			System.out.print("keyword Dijkstra time:");
+			System.out.print("candidateDist time:");
 			Date currentTime2 = new Date();
 			System.out.println(currentTime2.getTime() - currentTime1.getTime());
 
@@ -627,7 +636,6 @@ public class SparqlQuery {
 			LinkedList<ResultInfo> resultStack = new LinkedList<ResultInfo>(tempResultInfoList);
 
 			int next_match_pos = 0, cur_socre_bound = Integer.MAX_VALUE;
-			int candidate_count = resultStack.size();
 			while (resultStack.size() != 0 && queryEdgeList.size() != 0) {
 
 				if (resultSet.size() > TopKNum)
@@ -684,7 +692,6 @@ public class SparqlQuery {
 							if (resultSet.size() > TopKNum)
 								resultSet.pollLast();
 						}
-						candidate_count++;
 					} else {
 						if (tempResultInfo.matchArr[next_match_pos] == cur_id) {
 							ResultInfo curResultInfo = new ResultInfo(tempResultInfo, tempResultInfo.pos + 1);
@@ -696,7 +703,6 @@ public class SparqlQuery {
 								if (resultSet.size() > TopKNum)
 									resultSet.pollLast();
 							}
-							candidate_count++;
 						}
 					}
 				}
@@ -715,18 +721,24 @@ public class SparqlQuery {
 			System.out.println();
 			System.out.println(resultSet.size());
 
+			PrintStream out_summary = new PrintStream(new File(dir_index + "/queryAns.txt"));
 			Iterator<ResultInfo> iter = resultSet.iterator();
 			while (iter.hasNext()) {
 				ResultInfo e = iter.next();
 				for (int i = 0; i < e.matchArr.length; i++) {
 					System.out.print(IDEntityMap.get(e.matchArr[i]) + "\t");
+					out_summary.print(IDEntityMap.get(e.matchArr[i]) + "\t");
 				}
 				System.out.println(Arrays.toString(e.scoreArr));
+				out_summary.println();
 			}
 
 			// System.out.println("candidate count:\t" + candidate_count);
 			System.out.println("keyword count:\t" + keyword_count);
+			System.out.println("results can be found at index/queryAns.txt");
 
+			out_summary.flush();
+			out_summary.close();
 			if (myDatabase1 != null) {
 				myDatabase1.close();
 			}
@@ -742,14 +754,10 @@ public class SparqlQuery {
 				myDbEnvironment2.close();
 			}
 
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	private static TreeMap<String, TreeSet<String>> generateVarPatternMap(
@@ -927,22 +935,6 @@ public class SparqlQuery {
 			}
 		}
 		return -2;
-	}
-
-	private static byte[] intArrayToBytes(int[] a) {
-		byte[] b = new byte[a.length + a.length + a.length + a.length];
-		int offset = 8, pos = 0;
-
-		for (int i = 0; i < a.length; i++) {
-			offset = 0;
-			pos = i + i + i + i;
-			for (int j = 0; j < 4; j++) {
-				b[pos + j] = (byte) (a[i] >> (24 - offset));
-				offset += 8;
-			}
-		}
-
-		return b;
 	}
 
 	private static int[] byteToInt2(byte[] b) {
