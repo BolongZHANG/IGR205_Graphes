@@ -55,7 +55,6 @@ function neigh(a, b) {
     return a == b || adjlist[a + "-" + b];
 }
 
-
 var svg = d3.select("#viz").attr("width", width).attr("height", height);
 var container = svg.append("g");
 
@@ -101,6 +100,17 @@ var labelNode = container.append("g").attr("class", "labelNodes")
     .style("font-size", 12)
     .style("pointer-events", "none"); // to prevent mouseover/drag capture
 
+// var labelLink = container.append("g").attr("class", "labelLinks")
+//     .selectAll("text")
+//     .data(label.links)
+//     .enter()
+//     .append("text")
+//     .text(function(d, i) { return "label"; })
+//     .style("fill", "#555")
+//     .style("font-family", "Arial")
+//     .style("font-size", 10)
+//     .style("pointer-events", "none");
+
 node.on("mouseover", focus).on("mouseout", unfocus);
 
 function ticked() {
@@ -113,8 +123,13 @@ function ticked() {
         d.x = d.node.x + 10;
         d.y = d.node.y + 10;
     });
-    labelNode.call(updateNode);
+    // labelLink.each(function(d, i) {
+    //     d.x = d.node.x;
+    //     d.y = d.node.y;
+    // });
 
+    labelNode.call(updateNode);
+    // labelLink.call(updateLink);
 }
 
 function fixna(x) {
@@ -128,15 +143,19 @@ function focus(d) {
         return neigh(index, o.index) ? 1 : 0.1;
     });
     labelNode.attr("display", function(o) {
-      return neigh(index, o.node.index) ? "block": "none";
+        return neigh(index, o.node.index) ? "block": "none";
     });
     link.style("opacity", function(o) {
         return o.source.index == index || o.target.index == index ? 1 : 0.1;
     });
+    // labelLink.attr("display", function(o) {
+    //     return o.source.index == index || o.target.index == index ? "block": "none";
+    // });
 }
 
 function unfocus() {
    labelNode.attr("display", "block");
+   // labelLink.attr("display", "block");
    node.style("opacity", 1);
    link.style("opacity", 1);
 }
