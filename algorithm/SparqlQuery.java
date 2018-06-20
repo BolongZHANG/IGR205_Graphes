@@ -707,12 +707,13 @@ public class SparqlQuery {
 					out_summary_json.print("\"" + variableArr[i] + "\": { \"type\": ");
 					if (IDEntityMap.get(e.matchArr[i]).charAt(0) == '<') {
 						out_summary_json.print("\"uri\" , \"value\": ");
+						out_summary_json.print("\"" + IDEntityMap.get(e.matchArr[i]) + "\"" + "}");
 					} else {
 						out_summary_json.print("\"literal\" , \"value\": ");
+						out_summary_json.print(IDEntityMap.get(e.matchArr[i]) + "}");
 					}
 					System.out.print(IDEntityMap.get(e.matchArr[i]) + "\t");
 					out_summary.print(IDEntityMap.get(e.matchArr[i]) + "\t");
-					out_summary_json.print("\"" + IDEntityMap.get(e.matchArr[i]) + "\"" + "}");
 					if (i < e.matchArr.length - 1) {
 						out_summary_json.print(",");
 					}
