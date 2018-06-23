@@ -11,7 +11,7 @@ let draw_function = new Draw_Force(600,1000)
 
 d3.json("../data/sembib.json").then(function(data) {        
     dataset = data
-    console.log(dataset)
+    //console.log(dataset)
     for(edge of data.results.bindings){
         G.addEdge(edge.t1.value, edge.t2.value, edge.p1)
         G.node.get(edge.t1.value).type = edge.t1.type
@@ -54,43 +54,49 @@ function changeNodeNumber(){
 }
 
 function updateSubgraph(nodeNb) {
-    console.log('updateSubgraph')
-    sorted_node = G.nodes(true).sort(function(a,b) {
-        return b[1].degree - a[1].degree;
-    });
-    console.log(sorted_node.slice(0,nodeNb))
+    if (nodeNb > 0) {
+        //console.log('updateSubgraph')
+        sorted_node = G.nodes(true).sort(function(a,b) {
+            return b[1].degree - a[1].degree;
+        });
+        //console.log(sorted_node.slice(0,nodeNb))
 
-    subnodes = []
-    for(node of sorted_node.slice(0,nodeNb)){
-        subnodes.push(node[0])
-    }
-    //subG = G.subgraph(subnodes)
-    
+        subnodes = []
+        for(node of sorted_node.slice(0,nodeNb)){
+            subnodes.push(node[0])
+        }
+        //subG = G.subgraph(subnodes)
+        
 
-    unG = new jsnx.Graph(G)
-    //path = jsnx.allPairsShortestPath(G)
+        unG = new jsnx.Graph(G)
+        //path = jsnx.allPairsShortestPath(G)
 
-    pathnodes = new Set([])
-    //testnodes = new Set([])
-    for (var i=0; i<subnodes.length; i++){
-        for (var j=i+1; j<subnodes.length; j++){
-            if (jsnx.hasPath(unG,{source: subnodes[i], target: subnodes[j]})){
-                //pathnodes = pathnodes.concat(jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}))
-                jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}).forEach(pathnodes.add, pathnodes)
-            } else {
-                pathnodes.add(subnodes[i],subnodes[j])
-                //testnodes.add(subnodes[i],subnodes[j])
-                //console.log("add no path case")
+        pathnodes = new Set([])
+        //testnodes = new Set([])
+        for (var i=0; i<subnodes.length; i++){
+            for (var j=i+1; j<subnodes.length; j++){
+                if (jsnx.hasPath(unG,{source: subnodes[i], target: subnodes[j]})){
+                    //pathnodes = pathnodes.concat(jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}))
+                    jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}).forEach(pathnodes.add, pathnodes)
+                } else {
+                    pathnodes.add(subnodes[i],subnodes[j])
+                    //testnodes.add(subnodes[i],subnodes[j])
+                    //console.log("add no path case")
+                }
             }
         }
-    }
 
-    //pathnodes.forEach(subnodes.add, subnodes)
-    //subnodes = subnodes.concat(Array.from(pathnodes))
-    subG = G.subgraph(pathnodes)
-    console.log(subG)
-    draw_function.updateGraph(subG)
-    // draw(subG)
+        //pathnodes.forEach(subnodes.add, subnodes)
+        //subnodes = subnodes.concat(Array.from(pathnodes))
+        subG = G.subgraph(pathnodes)
+        //console.log(subG)
+        draw_function.updateGraph(subG)
+        //draw(subG)
+    } else {
+        //console.log("graw G")
+        draw_function.updateGraph(G)
+    }
+    
 }
 
 // var svg = d3.select("svg"),

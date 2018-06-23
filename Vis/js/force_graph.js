@@ -1,7 +1,8 @@
 let simulation
+
 let Draw_Force = function (height, width) {
     let color = d3.scaleOrdinal(d3.schemeCategory20)
-    let scaleR = null;
+    let intervalTimer = null
     let links = null
     let nodes = null
     let nodes_list
@@ -25,19 +26,19 @@ let Draw_Force = function (height, width) {
     const defs = this.svg.append('defs'); // defs定义可重复使用的元素
     const arrowheads = defs.append('marker') // 创建箭头
         .attr('id', 'arrow')
-        // .attr('markerUnits', 'strokeWidth') // 设置为strokeWidth箭头会随着线的粗细进行缩放
+        //.attr('markerUnits', 'strokeWidth') // 设置为strokeWidth箭头会随着线的粗细进行缩放
         .attr('markerUnits', 'userSpaceOnUse') // 设置为userSpaceOnUse箭头不受连接元素的影响
         .attr('class', 'arrowhead')
-        .attr('markerWidth', 20) // viewport
-        .attr('markerHeight', 20) // viewport
+        .attr('markerWidth', 26) // viewport
+        .attr('markerHeight', 26) // viewport
         .attr('viewBox', '0 0 20 20') // viewBox
-        .attr('refX', 9.3) // 偏离圆心距离
+        .attr('refX', 18) // 偏离圆心距离
         .attr('refY', 5) // 偏离圆心距离
         .attr('orient', 'auto'); // 绘制方向，可设定为：auto（自动确认方向）和 角度值
     
     arrowheads.append('path')
         .attr('d', 'M0,0 L0,10 L10,5 z') // d: 路径描述，贝塞尔曲线
-        .attr('fill', '#666S'); // 填充颜色
+        .attr('fill', 'DarkCyan'); // 填充颜色
 
     this.links_group = this.svg.append('g')
         .attr('class', 'links')
@@ -48,16 +49,24 @@ let Draw_Force = function (height, width) {
 
     simulation = d3.forceSimulation()
         .force("link", d3.forceLink().distance(200).id(function(d) { return d.id; }))
-        .force("charge", d3.forceManyBody().distanceMin(5).distanceMax(100).strength(-50))
+        .force("charge", d3.forceManyBody().distanceMin(5).distanceMax(100).strength(-60))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
     this.updateScale = function(graph){
-        let max = d3.max(nodes_list, d =>d.degree);
-        let min = d3.min(nodes_list, d => d.degree);
+        let maxD = d3.max(nodes_list, d =>d.degree);
+        let minD = d3.min(nodes_list, d => d.degree);
+        let maxInD = d3.max(nodes_list, d =>d.inDegree);
+        let minInD = d3.min(nodes_list, d => d.inDegree);
+        let maxOutD = d3.max(nodes_list, d =>d.outDegree);
+        let minOutD = d3.min(nodes_list, d => d.outDegree);
 
-        console.log('min:', min, 'max', max);
-        scaleR = d3.scaleLinear().range([7,20])
-            .domain([min, max])
+        //console.log('min:', min, 'max', max);
+        scaleD = d3.scaleLinear().range([6,20])
+            .domain([Math.sqrt(minD), Math.sqrt(maxD)])
+        scaleInD = d3.scaleLinear().range([6,20])
+            .domain([Math.sqrt(minInD), Math.sqrt(maxInD)])
+        scaleOutD = d3.scaleLinear().range([6,20])
+            .domain([Math.sqrt(minOutD), Math.sqrt(maxOutD)])
     }
 
     this.updateGraph = function(graph) {
@@ -70,7 +79,7 @@ let Draw_Force = function (height, width) {
             nodes_list.push( g_node[1] )
         }
 
-        console.log("nodes_list", nodes_list)
+        //console.log("nodes_list", nodes_list)
         edges_list = []
         for( let g_edge of graph.edges(true)){
             edges_list.push( {
@@ -80,11 +89,9 @@ let Draw_Force = function (height, width) {
                 id:g_edge[2].value
             })
         }
-        console.log("edges_list", edges_list)
+        //console.log("edges_list", edges_list)
 
-
-
-        console.log("updateGraph():Get graph" + graph)
+        //console.log("updateGraph():Get graph" + graph)
         this.updateScale(graph)
         links = this.links_group.selectAll(".link")
             .data(edges_list, d => d.id)
@@ -98,7 +105,7 @@ let Draw_Force = function (height, width) {
         links = links.enter().append('path')
             .attr('id', d=>d.id)
             .attr('class', 'link')
-            .attr('stroke', 'blue')
+            .attr('stroke', 'LightSeaGreen')
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#arrow)')
             .merge(links)
@@ -108,24 +115,39 @@ let Draw_Force = function (height, width) {
         nodes.exit()
             .transition().duration(500)
             .attr("r", 0)
-            .attr("fill", function(d) { return color(d.group); })
+            //.attr("fill", function(d) { return color(d.group); })
             .remove();
 
         nodes = nodes.enter()
             .append("circle")
             .attr('r', d=> {
                 //console.log(d)
-                return scaleR(d.degree)
+                //console.log(d.degree)
+                //console.log(Math.sqrt(d.degree))
+                //console.log(scaleR(Math.sqrt(d.degree)))
+                return scaleD(Math.sqrt(d.degree))
+                //scaleD for degree; scaleInD for inDegree;
             })
             .attr("id", d=> d.id)
-            .attr('stroke', 'orange')
+            .attr('stroke', 'SeaGreen')
             .attr('stroke-width', 2)
-            .attr("fill", function(d) { return color(d.group); })
-            .on("dblclick", dragended)
-            .on("mouseover", focus).on("mouseout", unfocus)
+            //.attr("fill", function(d) { return color(d.group); })
+            .attr("fill", function(d) { 
+                if (d.type === "uri") {
+                    return "SandyBrown"
+                } else if (d.type === "bnode") {
+                    return "SkyBlue"
+                } else {
+                    return "Pink"
+                }
+            })
+            .on("mouseover", focus)
+            .on("mouseout", unfocus)
+            .on("click", click)
+            .on("dblclick", dragend)
             .call(d3.drag()
-                 .on("start", dragstarted)
-                 .on("drag", dragged))
+                 .on("start", dragstart)
+                 .on("drag", drag))
                 //.on("end", dragended)
                 //.on("start", dragstart))
             .merge(nodes)
@@ -143,7 +165,7 @@ let Draw_Force = function (height, width) {
 
         simulation
             .nodes(nodes_list)
-            .on("tick", ticked);
+            .on("tick", tick);
 
         simulation.force("link")
             .links(edges_list);
@@ -159,23 +181,23 @@ let Draw_Force = function (height, width) {
     // });
 
     function neigh(a, b) {
-        console.log("a ", a," b ", b,unGraph.neighbors(b), (a in unGraph.neighbors(b)))
+        //console.log("a ", a," b ", b,unGraph.neighbors(b), (a in unGraph.neighbors(b)))
 
         return (unGraph.adj.get(b).get(a) !== undefined)||(a === b);
     }
 
     function focus(d) {
         var id = d3.select(d3.event.target).datum().id;
-        console.log("id ", id)
+        //console.log("id ", id)
         nodes.style("opacity", function(o) {
-            console.log("node o ", o)
+            //console.log("node o ", o)
             return neigh(id, o.id) ? 1 : 0.1;
         });
         // labelNode.attr("display", function(o) {
         //   return neigh(index, o.node.index) ? "block": "none";
         // });
         links.style("opacity", function(o) {
-            console.log("link o ", o)
+            //console.log("link o ", o)
             return o.source.id == id || o.target.id == id ? 1 : 0.1;
         });
     }
@@ -186,30 +208,71 @@ let Draw_Force = function (height, width) {
        links.style("opacity", 1);
     }
 
-    function dragstarted(d) {
+    function dragstart(d) {
         if (!d3.event.active) simulation.alphaTarget(0.1).restart();
         d.fx = d.x;
         d.fy = d.y;
     }
 
-    function dragged(d) {
-        console.log("d", d, "this", this)
+    function drag(d) {
+        //console.log("d", d, "this", this)
         d.fx = d3.event.x;
         d.fy = d3.event.y;
-        d3.select(this)
-          .attr('stroke', 'pink')
+        let nodeColor = d3.select(this).attr('fill');
+        if (nodeColor == "SandyBrown") {
+            d3.select(this).attr('fill', "Tomato")
+        } else if (nodeColor == "SkyBlue") {
+            d3.select(this).attr('fill', "RoyalBlue")
+        } 
     }
 
-    function dragended(d) {
+    function dragend(d) {
+        //clearTimeout(intervalTimer);
+        // dblclick 事件的处理
         if (!d3.event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
-        d3.select(this)
-          .attr('stroke', 'orange')
+        let nodeColor = d3.select(this).attr('fill');
+        if (nodeColor == "Tomato") {
+            d3.select(this).attr('fill', "SandyBrown")
+        } else if (nodeColor == "RoyalBlue") {
+            d3.select(this).attr('fill', "SkyBlue")
+        }
     }
 
+    function click(d) {
+        let nodeColor = d3.select(this).attr('stroke');
 
-    function ticked() {
+        if (nodeColor == "SeaGreen") {
+            d3.select(this)
+              .attr('stroke', 'MediumPurple')
+              .attr('stroke-width', 5)
+        } else if (nodeColor == "MediumPurple") {
+            d3.select(this)
+              .attr('stroke', 'SeaGreen')
+              .attr('stroke-width', 2)
+        }
+
+        // clearTimeout(intervalTimer); //取消上次延时未执行的方法
+     
+        // let nodeColor = d3.select(this).attr('stroke');
+        // intervalTimer = setTimeout(function() {
+        //     // click 事件的处理
+            
+        //     if (nodeColor == "SeaGreen") {
+        //         d3.select(this)
+        //           .attr('stroke', 'MediumPurple')
+        //           .attr('stroke-width', 5)
+        //     } else if (nodeColor == "MediumPurple") {
+        //         d3.select(this)
+        //           .attr('stroke', 'SeaGreen')
+        //           .attr('stroke-width', 2)
+        //     }
+        // }, 500);
+      
+    }
+
+    function tick() {
         links
         .attr('d', 
             (d) => 
@@ -266,16 +329,4 @@ let Draw_Force = function (height, width) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
