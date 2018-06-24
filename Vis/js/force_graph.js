@@ -1,4 +1,6 @@
 let simulation
+let clickRecoder = {}
+
 
 let Draw_Force = function (height, width) {
     let color = d3.scaleOrdinal(d3.schemeCategory20)
@@ -244,8 +246,16 @@ let Draw_Force = function (height, width) {
 
 
         if(window.event.ctrlKey){
-            console.log('OnClickNode()', d, G.neighbors(d.id))
-            pathnodes = new Set([...pathnodes, ...unG.neighbors(d.id)])
+            if(d.id in clickRecoder){
+                pathnodes = new Set([...pathnodes].filter(x=> !clickRecoder[d.id].has(x)))
+                delete clickRecoder[d.id]
+            }else{
+                let newNodesList = unG.neighbors(d.id)
+                let difference = new Set([...newNodesList].filter(x=> !pathnodes.has(x)))
+                clickRecoder[d.id] = difference
+                pathnodes = new Set([...pathnodes, ...difference])
+            }
+
             subG = G.subgraph(pathnodes)
             draw_function.updateGraph(subG)
         }else{
