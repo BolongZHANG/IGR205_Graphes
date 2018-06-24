@@ -143,7 +143,7 @@ let Draw_Force = function (height, width) {
             })
             .on("mouseover", focus)
             .on("mouseout", unfocus)
-            .on("click", click)
+            .on("click", onClickNode)
             .on("dblclick", dragend)
             .call(d3.drag()
                  .on("start", dragstart)
@@ -240,18 +240,28 @@ let Draw_Force = function (height, width) {
         }
     }
 
-    function click(d) {
-        let nodeColor = d3.select(this).attr('stroke');
+    function onClickNode(d) {
 
-        if (nodeColor == "SeaGreen") {
-            d3.select(this)
-              .attr('stroke', 'MediumPurple')
-              .attr('stroke-width', 5)
-        } else if (nodeColor == "MediumPurple") {
-            d3.select(this)
-              .attr('stroke', 'SeaGreen')
-              .attr('stroke-width', 2)
+
+        if(window.event.ctrlKey){
+            console.log('OnClickNode()', d, G.neighbors(d.id))
+            pathnodes = new Set([...pathnodes, ...unG.neighbors(d.id)])
+            subG = G.subgraph(pathnodes)
+            draw_function.updateGraph(subG)
+        }else{
+            let nodeColor = d3.select(this).attr('stroke');
+
+            if (nodeColor == "SeaGreen") {
+                d3.select(this)
+                    .attr('stroke', 'MediumPurple')
+                    .attr('stroke-width', 5)
+            } else if (nodeColor == "MediumPurple") {
+                d3.select(this)
+                    .attr('stroke', 'SeaGreen')
+                    .attr('stroke-width', 2)
+            }
         }
+
 
         // clearTimeout(intervalTimer); //取消上次延时未执行的方法
      

@@ -9,7 +9,7 @@ let subnodes
 let pathnodes
 let draw_function = new Draw_Force(600,1000)
 
-d3.json("../data/sembib.json").then(function(data) {        
+d3.json("./data/sembib.json").then(function(data) {
     dataset = data
     //console.log(dataset)
     for(edge of data.results.bindings){
