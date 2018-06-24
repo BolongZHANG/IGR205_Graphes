@@ -78,19 +78,44 @@
 				</div>
 
 				<div>
-					<button id="send_keyword" onclick="changeNodeNumber()"> Submit </button>
+					<button id="send_keyword" onclick="submit_keyword()"> Submit </button>
 				</div>
 			</fieldset>
 		</div>
 		<div id="div-dropdown-query" class="container-fluid side_navbar_elements">
 			<fieldset>
 				<legend>Query</legend>
-				<div>
-					<textarea id="input_query"></textarea>
+				<div class="input-group" id="rdf-search">
+					<input id="rdf-search-input" type="text" class="form-control" placeholder="Search...">
+					<div class="input-group-btn">
+						<div class="btn-group" role="group">
+							<div class="dropdown dropdown-lg">
+								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span></button>
+								<div class="dropdown-menu dropdown-menu-right" role="menu" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(38px, 38px, 0px);">
+									<form class="form-horizontal" role="form">
+										<div class="form-group">
+											<label for="graphe">Graphe</label>
+											<select id="selectGraph" class="form-control">
+												<option value="0" selected="">Sembib</option>
+												<option value="1">Datamusee</option>
+											</select>
+										</div>
+
+										<div class="form-group">
+											<label for="visualisation">Visualisation</label>
+											<select class="form-control">
+												<option value="0" selected="">Visualisation 1</option>
+												<option value="1">Visualisation 2</option>
+											</select>
+										</div>
+									</form>
+								</div>
+							</div>
+							<button id="rdf-search-button" class="btn btn-primary"><span class="fa fa-search" aria-hidden="true"></span></button>
+						</div>
+					</div>
 				</div>
-				<div>
-					<button id="send_query" onclick="changeNodeNumber()">Send Query</button>
-				</div>
+
 			</fieldset>
 		</div>
 		<div id="div-dropdown-file" class="container-fluid side_navbar_elements">
@@ -157,8 +182,27 @@
 					   onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}">
 				<button id="update" onclick="changeNodeNumber()">Valide</button>
 
+
+
 			</fieldset>
 
+			<fieldset >
+				<legend>Graph Info</legend>
+
+				<div id="graph_info">
+
+				</div>
+
+			</fieldset>
+
+			<fieldset >
+				<legend>Status</legend>
+
+				<div id="status_info">
+
+				</div>
+
+			</fieldset>
 
 		</div>
 
@@ -173,6 +217,8 @@
 	
 	<!-- Project scripts-->
 	<script type="text/javascript" src="js/index.js"></script>
+	<script type="text/javascript" src="js/makeQuery.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
 
 	<!--<script src="http://d3js.org/colorbrewer.v1.min.js"></script>	-->
 	<!--<script src="js/create_map_pie.js"></script>-->

@@ -33,13 +33,39 @@ function loadJsonFile(){
 
 
         //draw(G)
-
+        show_graph_info()
         draw_function = new Draw_Force(800,600)
         updateSubgraph(20)
 
     }).catch(error =>
         console.error("loadJsonFile():","Fail get data cause by",error ))
 
+}
+
+
+function display_data(data){
+    console.log("loadJsonFile:","Successful get data url:")
+    set_status_info("Create graph.....")
+    dataset = data
+    //console.log(dataset)
+    for(edge of data.results.bindings){
+        G.addEdge(edge.t1.value, edge.t2.value, edge.p1)
+        G.node.get(edge.t1.value).type = edge.t1.type
+        G.node.get(edge.t2.value).type = edge.t2.type
+    }
+    //console.log(G)
+    let bc = jsnx.betweennessCentrality(G)
+    for(node of G){
+        G.node.get(node).degree = G.degree(node)
+        G.node.get(node).inDegree = G.inDegree(node)
+        G.node.get(node).outDegree = G.outDegree(node)
+        G.node.get(node).betweennessCentrality = bc.get(node)
+    }
+
+    //draw(G)
+    show_graph_info()
+    draw_function = new Draw_Force(800,600)
+    updateSubgraph(20)
 }
 //
 // d3.json("./data/sembib.json").then(function(data) {
@@ -92,6 +118,8 @@ function updateSubgraph(nodeNb, indicator) {
         draw_function.updateGraph(G)
         return
     }
+
+    set_status_info("Sort the nodes.....")
 
     if(indicator === "degree"){
         sorted_node = G.nodes(true).sort(function(a,b) {
@@ -208,3 +236,75 @@ function updateSubgraph(nodeNb, indicator) {
 //       .call(zoom.transform, d3.zoomIdentity);
 // }
 
+let server = "http://127.0.0.1:8815/summary_graph?"
+let summary_graph_data
+
+
+function submit_keyword(){
+    remove_graph_info()
+    let k = document.getElementById('input_distance').value
+    let keyword = document.getElementById('input_keyword').value
+    console.log("keyword", keyword, "distance", k)
+    if(keyword === ""){
+        alert("Please type a key word");
+        return false
+    }
+    if(k < 1){
+        alert("The distance have to bigger than 1")
+        return false;
+    }
+
+    set_status_info("Submit info to server......: key word:" +keyword + " distance: " + k)
+
+    let url = server + "keyword=" + keyword + "&k="+ k
+    console.log("Submit_keyword()", url)
+    d3.json(url).then( data=>{
+        set_status_info("Successfully Get data...")
+        console.log("Update data", data)
+        summary_graph_data = data
+        json_to_graph(data)
+
+        updateSubgraph(getNodeNumber())
+    }).catch( error =>{
+        set_status_info("Error：" + error)
+        console.log("Get error:", error)
+    });
+    return true;
+}
+
+function json_to_graph(data){
+    set_status_info("Transform json to graph....")
+    G.clear()
+    for( let node of data.nodes){
+        G.addNode(node.id, node)
+    }
+
+    for( let edge of data.links){
+        G.addEdge(edge.source, edge.target, edge)
+    }
+
+    set_status_info("Calcule the degree ....")
+
+    let bc = jsnx.betweennessCentrality(G)
+    for(node of G){
+        G.node.get(node).degree = G.degree(node)
+        G.node.get(node).inDegree = G.inDegree(node)
+        G.node.get(node).outDegree = G.outDegree(node)
+        G.node.get(node).betweennessCentrality = bc.get(node)
+    }
+    show_graph_info()
+
+}
+
+function show_graph_info(){
+    document.getElementById("graph_info").innerHTML  = jsnx.info(G).replace(/\n/g, "<br />")
+}
+
+
+function set_status_info(info){
+    document.getElementById("status_info").innerHTML  = info
+}
+
+function remove_graph_info(){
+    document.getElementById("graph_info").innerHTML  = ""
+}

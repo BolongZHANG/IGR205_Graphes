@@ -173,6 +173,7 @@ let Draw_Force = function (height, width) {
             .links(edges_list);
 
         simulation.alphaTarget(0.1).restart();
+        set_status_info("Successfully draw the picture")
     }
 
     let adjlist = [];
@@ -218,6 +219,7 @@ let Draw_Force = function (height, width) {
 
     function drag(d) {
         //console.log("d", d, "this", this)
+        console.log("drag()", "拖拽")
         d.fx = d3.event.x;
         d.fy = d3.event.y;
         let nodeColor = d3.select(this).attr('fill');
@@ -231,6 +233,7 @@ let Draw_Force = function (height, width) {
     function dragend(d) {
         //clearTimeout(intervalTimer);
         // dblclick 事件的处理
+        console.log("释放")
         if (!d3.event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
@@ -250,7 +253,15 @@ let Draw_Force = function (height, width) {
                 pathnodes = new Set([...pathnodes].filter(x=> !clickRecoder[d.id].has(x)))
                 delete clickRecoder[d.id]
             }else{
-                let newNodesList = unG.neighbors(d.id)
+                let clickAction = getClickAction()
+                let newNodesList
+                if(clickAction === "neighbors"){
+                    console.log("neighbors")
+                    newNodesList = G.neighbors(d.id)
+                }else{
+                    newNodesList = unG.neighbors(d.id)
+                }
+
                 let difference = new Set([...newNodesList].filter(x=> !pathnodes.has(x)))
                 clickRecoder[d.id] = difference
                 pathnodes = new Set([...pathnodes, ...difference])
@@ -258,7 +269,7 @@ let Draw_Force = function (height, width) {
 
             subG = G.subgraph(pathnodes)
             draw_function.updateGraph(subG)
-        }else{
+
             let nodeColor = d3.select(this).attr('stroke');
 
             if (nodeColor == "SeaGreen") {
@@ -270,8 +281,8 @@ let Draw_Force = function (height, width) {
                     .attr('stroke', 'SeaGreen')
                     .attr('stroke-width', 2)
             }
-        }
 
+        }
 
         // clearTimeout(intervalTimer); //取消上次延时未执行的方法
      

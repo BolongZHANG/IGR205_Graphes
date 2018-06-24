@@ -26,7 +26,7 @@ d3.json("./data/sembib.json").then(function(data) {
         G.node.get(node).inDegree = G.inDegree(node)
         G.node.get(node).outDegree = G.outDegree(node)
     }
-
+    show_graph_info()
     //draw(G)
     updateSubgraph(20)  
 })
@@ -180,4 +180,52 @@ function updateSubgraph(nodeNb, indicator) {
 //       .duration(750)
 //       .call(zoom.transform, d3.zoomIdentity);
 // }
+
+let server = "http://127.0.0.1:8815/summary_graph?"
+let summary_graph_data
+
+
+function submit_keyword(){
+    let k = document.getElementById('input_distance').value
+    let keyword = document.getElementById('input_keyword').value
+    console.log("keyword", keyword, "distance", k)
+    if(keyword === ""){
+        alert("Please type a key word");
+        return false
+    }
+    if(k < 1){
+        alert("The distance have to bigger than 1")
+        return false;
+    }
+
+    let url = server + "keyword=" + keyword + "&k="+ k
+    console.log("Submit_keyword()", url)
+    d3.json(url).then( data=>{
+        console.log("Update data", data)
+        summary_graph_data = data
+        json_to_graph(data)
+        updateSubgraph(getNodeNumber())
+    });
+    return true;
+}
+
+function json_to_graph(data){
+    G.clear()
+    for( let node of data.nodes){
+        G.addNode(node.id, node)
+    }
+
+    for( let edge of data.links){
+        G.addEdge(edge.source, edge.target, edge)
+    }
+    console.log(G.nodes().length)
+    show_graph_info()
+
+}
+
+function show_graph_info(){
+    document.getElementById("graph_info").innerHTML  = jsnx.info(G).replace(/\n/g, "<br />")
+}
+
+
 
