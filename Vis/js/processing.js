@@ -9,6 +9,9 @@ let subnodes
 let pathnodes
 let draw_function = new Draw_Force(600,1000)
 
+
+
+
 d3.json("./data/sembib.json").then(function(data) {
     dataset = data
     //console.log(dataset)
@@ -53,8 +56,31 @@ function changeNodeNumber(){
     //console.log("changeNodeNumber()", nodeNb)
 }
 
-function updateSubgraph(nodeNb) {
-    if (nodeNb > 0) {
+function updateSubgraph(nodeNb, indicator) {
+
+    if(nodeNb <=0){
+        draw_function.updateGraph(G)
+        return
+    }
+
+    if(indicator === "degree"){
+        sorted_node = G.nodes(true).sort(function(a,b) {
+            return b[1].degree - a[1].degree;
+        });
+    }else if(indicator === "in_degree"){
+        sorted_node = G.nodes(true).sort(function(a,b) {
+            return b[1].inDegree - a[1].inDegree;
+        });
+    }else if(indicator === "out_degree"){
+        sorted_node = G.nodes(true).sort(function(a,b) {
+            return b[1].outDegree - a[1].outDegree;
+        });
+    }else{
+        sorted_node = G.nodes(true).sort(function(a,b) {
+            return b[1].bc - a[1].bc;
+        });
+    }
+
         //console.log('updateSubgraph')
         sorted_node = G.nodes(true).sort(function(a,b) {
             return b[1].degree - a[1].degree;
@@ -92,10 +118,7 @@ function updateSubgraph(nodeNb) {
         //console.log(subG)
         draw_function.updateGraph(subG)
         //draw(subG)
-    } else {
-        //console.log("graw G")
-        draw_function.updateGraph(G)
-    }
+
     
 }
 
