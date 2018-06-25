@@ -71,8 +71,8 @@ Le graphe “résumé” est un graphe constitué seulement des sommets de type 
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
-#### Partie algorithme
-Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposé par ce livre. Vous pouvez trouvez la trace dans le [dossier](E:\telecom_paristech\IGR205_Graphes\visualisation_module\demo_datamusse\js).
+#### Partie visualisation
+Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposé par ce livre. Vous pouvez trouvez la trace dans le [dossier](visualisation_module\demo_datamusse\js).
 
 [*Retour au calendrier*](#développement-du-projet)
 
@@ -98,12 +98,12 @@ On commence par un indexage hors ligne où les donnée du graphe sont traitées 
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
-#### Partie Visualisation
-Nous avons continué à étudié la D3 et on constate que la froce-graph bien répond à notre besion. Par conseqent, on cherche des démo sur l'internet et le tester. Vous pouvez trouvez ces examples dans ce [dossier](visualisation_module/example_inspiration)
+#### Partie visualisation
+Nous avons continué à étudié la D3 et on constate que la froce-graph bien répond à notre besion. Par conseqent, on cherche des démo sur l'internet et le tester pour inspiré.
 
- Avant de visualisation, on doit bien connaitre la structure de graph. On a commencé à travailler sur la base de donnée **sembib**.  On tout d'abord analyser ce base de donnée à l'aide de python package [networkx](https://networkx.github.io/). On trouve que ce database contient plusieur sous composent independant. Du coup, on crée mon [premier demo](visualisation_module/demo_datamusse/index.html) pour visulaliser cette charactéristique.On tout d'abord traiter les donnée avec python et creer un fichier de json pour chaque composant.
-![alt text](img/demo-1-total.png "Logo Title Text 1")
-Dans la premier vue, tu peut voir centaine cercles indépendant sur ce graph. Chaque cricle est un composante faible connexe. Si on clique sur ces cercle, on peut voir le detail de ce composants.
+ visualisation, on doit bien connaitre la structure de graph. On a commencé à travailler sur la base de donnée **sembib**.  On tout d'abord analyser ce base de donnée à l'aide de python package [networkx](https://networkx.github.io/). On trouve que ce database contient plusieur sous composent independant. Du coup, on crée mon [premier demo](visualisation_module/demo_datamusse/index.html) pour visulaliser cette charactéristique.
+![alt text](doc/demo-1-total.png)
+Dans la première vue, Vous pouvez voir centaine cercles indépendant sur ce graph. Chaque cricle est un composante faible connexe. Si on clique sur ces cercle, on peut voir le detail de ce composants.
 
 [*Retour au calendrier*](#développement-du-projet)
 
@@ -119,18 +119,18 @@ La partie principale de l’algorithme consiste en trois parties. Tout d’abord
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
-[*Retour au calendrier*](#développement-du-projet)
-
-### Partie visualisation
+#### Partie visualisation
 Cette semaine, on a travaillé sur **sembib**.
 On a essayé d'utiliser autre type graph pour visulasation, par example, tree ou chord. 
 
 On trouve que la base de donnée, sembib, contiens plusier composant indépendant. Chaque composant est un sous-graph 
 On écrit une programme afin de tester tous les sous-graphe.  A l'aide de python package [networkx](https://networkx.github.io/), on trouve que plus part de sous-graph ne contiens pas un "spanning arborescence". C'est à dire il n'est pas possible de créer une tree comme ue visualisation général pour **sembib**.
 
-On tente de faire un chord avec ces données. Afin de realiser ce graph, il faut attribuer chaque node un "type" indiqué la groupde de ce node. Mais les collègues qui travaillent sur la partie algorithme nous ont dit que il n'est pas possible de  attribuer chaque node un type. Donc, on ne pouvez pas créer une chrod comme une visualisation géneral.
+On tente de faire un chord avec ces données. Afin de realiser ce graph, il faut attribuer chaque node un "type" indiqué la group de de ce node. Mais les collègues qui travaillent sur la partie algorithme nous ont dit que il n'est pas possible de  attribuer chaque node un type. Donc, on ne pouvez pas créer une chrod comme une visualisation géneral.
 
 Par `Bolong ZHANG` et `Fangda ZHU`
+
+[*Retour au calendrier*](#développement-du-projet)
 
 ### Semaine 4
 **18/06-22/06**
@@ -145,11 +145,12 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 
 #### Partie visualisation
 Dans cette semaine, on décide de crée un outil visualisation afin de visualiser n'import quel base de donnée.
-Ce outil recois le fichier de rdf sous format json, et le visualise. Vous pouvez trouver la l'introduction sur ce outil dans ce [lien](visualisation_module\demo_final\README.md).
+Ce outil recois le fichier de rdf sous format json, et le visualise. Vous pouvez trouver la l'introduction sur ce outil dans [ce lien](visualisation_module/demo_final/README.md).
 
 Sachant que mes collégue propose des différent de method pour obtenir la graphe résumé. Afin d'adapter cette demande, on crée un page de web inspiré par le travail de `Corentin` en cours IGR204. 
 
 Par `Fangda ZHU` et `Bolong Zhang`
+
 [*Retour au calendrier*](#développement-du-projet)
 
 
@@ -246,7 +247,7 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 
 
 #### Partie visualisation
-Cette semaine, on fixed des bugs dans notre programme et continue faire des amélioration. Pour la detail, je vous conseille de voir le [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf)
+Cette semaine, on a fixé des bugs dans notre programme ,a continué à faire des améliorations sur la version finale et a ajouté plus d'interaction. Pour plus de detail et demonstration, je vous conseille fortement de voir le [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf)
 
 Par `Fangda ZHU` et `Bolong Zhang`
 
