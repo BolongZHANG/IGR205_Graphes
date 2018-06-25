@@ -41,6 +41,10 @@ Le but va être d'explorer différentes possibilités pour la visualisation et l
 - [**Semaine 4**](#semaine-4)
 - [**Semaine 5**](#semaine-5)
 
+## Partie visualisation
+
+Voir le [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf)
+
 ### Semaine 1
 **28/05-01/06**
 
