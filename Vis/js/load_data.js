@@ -62,10 +62,14 @@ function display_data(data){
     console.log("loadJsonFile:","Successful get data url:")
     set_status_info("Create graph.....")
     dataset = data
+    G.clear()
+    edgeSet.clear()
+
     for(edge of data.results.bindings){
         G.addEdge(edge.t1.value, edge.t2.value, edge.p1)
         G.node.get(edge.t1.value).type = edge.t1.type
         G.node.get(edge.t2.value).type = edge.t2.type
+
     }
     let bc = jsnx.betweennessCentrality(G)
     for(node of G){
@@ -288,11 +292,16 @@ function submit_keyword(){
 function json_to_graph(data){
     set_status_info("Transform json to graph....")
     G.clear()
+    edgeSet.clear()
+
     for( let node of data.nodes){
+        node.label = uriToStr(node.id)
         G.addNode(node.id, node)
     }
 
     for( let edge of data.links){
+        edge.label = uriToStr(edge.id)
+        edgeSet.add(edge.label)
         G.addEdge(edge.source, edge.target, edge)
     }
 
@@ -324,6 +333,7 @@ function remove_graph_info(){
 
 
 function uriToStr(uri){
+    uri = uri.replace(/<|>|"/g, "")
     if(uri.includes("http")){
         let val = uri.split(/#|\//)
         return val[val.length-1]

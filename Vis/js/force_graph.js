@@ -1,6 +1,6 @@
 let simulation
 let clickRecoder = {}
-
+let clickSet = new Set() //For click action
 
 let Draw_Force = function (height, width) {
     let color = d3.scaleOrdinal(d3.schemeCategory20)
@@ -153,7 +153,7 @@ let Draw_Force = function (height, width) {
             .on("mouseover", focus)
             .on("mouseout", unfocus)
             .on("click", onClickNode)
-            .on("dblclick", dragend)
+            // .on("dblclick", dragend)
             .call(d3.drag()
                 .on("start", dragstart)
                 .on("drag", drag))
@@ -201,9 +201,27 @@ let Draw_Force = function (height, width) {
         set_status_info("Successfully draw the picture")
         hasDisplayEdgeLable()
         hasDisplayNodeLable()
+
+
+        let zoom = d3.zoom().scaleExtent([0.2, 10]).on('zoom', zoomed)
+
+        d3.select('#canvas')
+            .call(zoom)
+.on("dblclick.zoom", null);
+
     }
 
-    let adjlist = [];
+    function zoomed () {
+        d3.select('#links').attr('transform',
+            'translate(' + d3.event.transform.x + ',' + d3.event.transform.y + ')scale(' + d3.event.transform.k + ')')
+
+        d3.select('#nodes').attr('transform',
+            'translate(' + d3.event.transform.x + ',' + d3.event.transform.y + ')scale(' + d3.event.transform.k + ')')
+
+        d3.select('#edgeLabels').attr('transform',
+            'translate(' + d3.event.transform.x + ',' + d3.event.transform.y + ')scale(' + d3.event.transform.k + ')')
+
+    }
 
     // this.edges_list.forEach(function(d) {
     //     adjlist[d.source.index + "-" + d.target.index] = true;
@@ -254,26 +272,29 @@ let Draw_Force = function (height, width) {
             d3.select(this).attr('fill', "Tomato")
         } else if (nodeColor == "SkyBlue") {
             d3.select(this).attr('fill', "RoyalBlue")
-        } 
-    }
-
-    function dragend(d) {
-        //clearTimeout(intervalTimer);
-        // dblclick 事件的处理
-        console.log("释放")
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-        let nodeColor = d3.select(this).attr('fill');
-        if (nodeColor == "Tomato") {
-            d3.select(this).attr('fill', "SandyBrown")
-        } else if (nodeColor == "RoyalBlue") {
-            d3.select(this).attr('fill', "SkyBlue")
         }
+
+        clickSet.add(d.id)
+        updateClickList()
     }
+    //
+    // function dragend(d) {
+    //     //clearTimeout(intervalTimer);
+    //     // dblclick 事件的处理
+    //     console.log("释放")
+    //     if (!d3.event.active) simulation.alphaTarget(0);
+    //     d.fx = null;
+    //     d.fy = null;
+    //     let nodeColor = d3.select(this).attr('fill');
+    //     if (nodeColor == "Tomato") {
+    //         d3.select(this).attr('fill', "SandyBrown")
+    //     } else if (nodeColor == "RoyalBlue") {
+    //         d3.select(this).attr('fill', "SkyBlue")
+    //     }
+    // }
 
     function onClickNode(d) {
-
+        if (d3.event.defaultPrevented) return;
 
         if(window.event.ctrlKey){
             if(d.id in clickRecoder){
@@ -308,6 +329,25 @@ let Draw_Force = function (height, width) {
                     .attr('stroke', 'SeaGreen')
                     .attr('stroke-width', 2)
             }
+
+        }else{
+            console.log("释放", d)
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+            let nodeColor = d3.select(this).attr('fill');
+            if (nodeColor == "Tomato") {
+                d3.select(this).attr('fill', "SandyBrown")
+            } else if (nodeColor == "RoyalBlue") {
+                d3.select(this).attr('fill', "SkyBlue")
+            }
+
+            if( clickSet.has(d.id)){
+                clickSet.delete(d.id)
+            }
+
+            updateClickList()
+
 
         }
 
@@ -403,3 +443,37 @@ let Draw_Force = function (height, width) {
     }
 }
 
+
+function updateClickList(){
+    console.log("update List:", clickSet)
+    let ckList = d3.select("#clickList").selectAll("li").data( [...clickSet], d=>{
+        return d
+    })
+
+    ckList.enter().append("li").attr("class", "list-group-item").text(d=>d)
+
+    ckList.exit().remove()
+
+
+}
+
+
+function getSubgrah(){
+    subnodes = [...clickSet]
+    pathnodes = new Set()
+    for (var i=0; i<subnodes.length; i++){
+        for (var j=i+1; j<subnodes.length; j++){
+            if (jsnx.hasPath(unG,{source: subnodes[i], target: subnodes[j]})){
+                //pathnodes = pathnodes.concat(jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}))
+                jsnx.shortestPath(unG,{source: subnodes[i], target: subnodes[j]}).forEach(pathnodes.add, pathnodes)
+            } else {
+                pathnodes.add(subnodes[i],subnodes[j])
+                //testnodes.add(subnodes[i],subnodes[j])
+                //console.log("add no path case")
+            }
+        }
+    }
+
+    subG = G.subgraph(pathnodes)
+    draw_function.updateGraph(subG)
+}
