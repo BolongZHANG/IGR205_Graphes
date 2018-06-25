@@ -15,7 +15,7 @@ Available on:
 ```
 http://127.0.0.1:8081 est le lien se server. Vous copiez ce lien dans votre navigateur et voir le page de notre site.
 
-Si vous voulez utiliser la mode **keyword**, il faut éxécuter autre server proposé par notre groupe. Pour plus de detail, voir ce [lien](../../workspace)
+Si vous voulez utiliser la mode **keyword**, il faut éxécuter autre server proposé par notre groupe. Pour plus de detail, voir ce [lien](../../server_module/README.md)
 
 ## Fonctionalité
 
