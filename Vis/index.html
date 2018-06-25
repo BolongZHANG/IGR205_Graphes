@@ -135,9 +135,9 @@
 		<div id="div-dropdown-show-dashboard" class="container-fluid side_navbar_elements">
 			<fieldset>
 				<legend>Label</legend>
-				<input type="checkbox" id="show_node_label" name="node_label"/>
+				<input type="checkbox" id="show_node_label" name="node_label" onclick="hasDisplayNodeLable(this);"/>
 				<label for="show_node_label">Node label</label>
-				<input type="checkbox" id="show_link_label" name="link_label"/>
+				<input type="checkbox" id="show_link_label" name="link_label" onclick="hasDisplayEdgeLable(this);"/>
 				<label for="show_link_label">Edge label</label>
 			</fieldset>
 
@@ -209,7 +209,11 @@
 	</div>
 
 	<div id="page_content">
-		<svg id="canvas"> </svg>
+		<svg id="canvas">
+			<g id="links"></g>
+			<g id="nodes"></g>
+			<g id="edgeLabels"></g>
+		</svg>
 	</div>
 
 </div>

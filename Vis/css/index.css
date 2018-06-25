@@ -131,6 +131,16 @@ img{
     margin-bottom:40px;
 }
 
+.node_label{
+    vertical-align:text-bottom;
+    text-anchor:middle;
+    dx: 2px
+}
+
+.edgeLable{
+    text-anchor:middle;
+}
+
 .dropdown.dropdown-lg .dropdown-menu {
     margin-top: -1px;
     padding: 6px 20px;

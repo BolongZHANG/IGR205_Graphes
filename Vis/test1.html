@@ -139,7 +139,6 @@
      
 
     force.on("tick", function(){
-
         edges.attr({"x1": function(d){return d.source.x;},
                     "y1": function(d){return d.source.y;},
                     "x2": function(d){return d.target.x;},
@@ -162,6 +161,7 @@
                 bbox = this.getBBox();
                 rx = bbox.x+bbox.width/2;
                 ry = bbox.y+bbox.height/2;
+                console.log(this)
                 return 'rotate(180 '+rx+' '+ry+')';
                 }
             else {

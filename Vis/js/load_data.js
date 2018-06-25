@@ -7,7 +7,7 @@ let dataset
 let sorted_node
 let subnodes
 let pathnodes
-
+let edgeSet = new Set()
 let draw_function = new Draw_Force(800,600)
 
 
@@ -15,13 +15,28 @@ function loadJsonFile(){
     d3.json(getFilePath()).then(function(data) {
         console.log("loadJsonFile:","Successful get data from path:",getFilePath(), data )
         dataset = data
-        //console.log(dataset)
+
+        G.clear()
+        edgeSet.clear()
+        let t1 = data.head.vars[0]
+        let p1 = data.head.vars[1]
+        let t2 = data.head.vars[2]
+
         for(edge of data.results.bindings){
-            G.addEdge(edge.t1.value, edge.t2.value, edge.p1)
-            G.node.get(edge.t1.value).type = edge.t1.type
-            G.node.get(edge.t2.value).type = edge.t2.type
+
+            let sub = uriToStr(edge[t1].value)
+            let pre = uriToStr(edge[p1].value)
+            let obj = uriToStr(edge[t2].value)
+
+            edgeSet.add(pre)
+
+            G.addEdge(edge[t1].value, edge[t2].value, {label:pre, id: sub+"-"+pre + "-" + obj, type:edge[p1].value})
+            G.node.get(edge[t1].value).type = edge[t1].type
+            G.node.get(edge[t1].value).label = sub
+
+            G.node.get(edge[t2].value).type = edge[t2].type
+            G.node.get(edge[t2].value).label = obj
         }
-        //console.log(G)
         let bc = jsnx.betweennessCentrality(G)
         for(node of G){
             G.node.get(node).degree = G.degree(node)
@@ -35,7 +50,7 @@ function loadJsonFile(){
         //draw(G)
         show_graph_info()
         draw_function = new Draw_Force(800,600)
-        updateSubgraph(20)
+        updateSubgraph(getNodeNumber())
 
     }).catch(error =>
         console.error("loadJsonFile():","Fail get data cause by",error ))
@@ -47,13 +62,11 @@ function display_data(data){
     console.log("loadJsonFile:","Successful get data url:")
     set_status_info("Create graph.....")
     dataset = data
-    //console.log(dataset)
     for(edge of data.results.bindings){
         G.addEdge(edge.t1.value, edge.t2.value, edge.p1)
         G.node.get(edge.t1.value).type = edge.t1.type
         G.node.get(edge.t2.value).type = edge.t2.type
     }
-    //console.log(G)
     let bc = jsnx.betweennessCentrality(G)
     for(node of G){
         G.node.get(node).degree = G.degree(node)
@@ -307,4 +320,38 @@ function set_status_info(info){
 
 function remove_graph_info(){
     document.getElementById("graph_info").innerHTML  = ""
+}
+
+
+function uriToStr(uri){
+    if(uri.includes("http")){
+        let val = uri.split(/#|\//)
+        return val[val.length-1]
+    }
+
+    return uri
+}
+
+function hasDisplayEdgeLable(){
+    let checked = document.getElementById("show_link_label").checked
+    if(checked){
+        d3.selectAll(".edgelabel").attr("display", "block")
+    }else{
+        d3.selectAll(".edgelabel").attr("display", "none")
+    }
+
+    console.log("hasDisplayEdgeLable()", checked)
+}
+
+
+
+function hasDisplayNodeLable(){
+    let checked = document.getElementById("show_node_label").checked
+    if(checked){
+        d3.selectAll(".nodeLabel").attr("display", "block")
+    }else{
+        d3.selectAll(".nodeLabel").attr("display", "none")
+    }
+
+    console.log("hasDisplayNodeLable()", checked)
 }

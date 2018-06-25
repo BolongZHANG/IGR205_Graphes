@@ -7,6 +7,7 @@ let Draw_Force = function (height, width) {
     let intervalTimer = null
     let links = null
     let nodes = null
+    let link_labels = null
     let nodes_list
     let edges_list
     let unGraph
@@ -42,12 +43,11 @@ let Draw_Force = function (height, width) {
         .attr('d', 'M0,0 L0,10 L10,5 z') // d: 路径描述，贝塞尔曲线
         .attr('fill', 'DarkCyan'); // 填充颜色
 
-    this.links_group = this.svg.append('g')
-        .attr('class', 'links')
-        .attr('id', 'links_group')
+    this.links_group = this.svg.select("#links")
 
-    this.nodes_group = this.svg.append('g')
-        .attr('class', 'nodes')
+    this.nodes_group = this.svg.select("#nodes")
+
+    this.labels_group = this.svg.select('#edgeLabels')
 
     simulation = d3.forceSimulation()
         .force("link", d3.forceLink().distance(200).id(function(d) { return d.id; }))
@@ -87,8 +87,8 @@ let Draw_Force = function (height, width) {
             edges_list.push( {
                 source:g_edge[0],
                 target:g_edge[1],
-                label:g_edge[2].value,
-                id:g_edge[2].value
+                label:g_edge[2].label,
+                id:g_edge[2].id
             })
         }
         //console.log("edges_list", edges_list)
@@ -96,7 +96,10 @@ let Draw_Force = function (height, width) {
         //console.log("updateGraph():Get graph" + graph)
         this.updateScale(graph)
         links = this.links_group.selectAll(".link")
-            .data(edges_list, d => d.id)
+            .data(edges_list, d => {
+                console.log("edge",d)
+                return d.id
+            })
 
         links.exit()
         // .transition()
@@ -105,36 +108,40 @@ let Draw_Force = function (height, width) {
         .remove();
         
         links = links.enter().append('path')
-            .attr('id', d=>d.id)
+            .attr('id', d=> {
+                console.log("links", d)
+                return d.id
+            })
             .attr('class', 'link')
             .attr('stroke', 'LightSeaGreen')
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#arrow)')
             .merge(links)
 
-        nodes = this.nodes_group.selectAll("circle").data(nodes_list, d => d.id)
+        link_labels = this.labels_group.selectAll(".edgelabel").data(edges_list, d=>d.id)
 
-        nodes.exit()
-            .transition().duration(500)
-            .attr("r", 0)
-            //.attr("fill", function(d) { return color(d.group); })
-            .remove();
+        link_labels.enter().append("text")
+            .attr("class", "edgelabel")
+            // .append('textPath')
+            // .attr("xlink:herf", d=> "#"+d.id)
+            .text( d=>d.label)
 
-        nodes = nodes.enter()
-            .append("circle")
-            .attr('r', d=> {
-                //console.log(d)
-                //console.log(d.degree)
-                //console.log(Math.sqrt(d.degree))
-                //console.log(scaleR(Math.sqrt(d.degree)))
-                return scaleD(Math.sqrt(d.degree))
-                //scaleD for degree; scaleInD for inDegree;
+        link_labels.exit().transition().duration(1000).attr("opacity",0).remove()
+
+        nodes = this.nodes_group.selectAll(".node_group").data(nodes_list, d =>{
+            //TODO
+            console.log("node", d)
+            return d.id
+        } )
+        let nodes_enter = nodes.enter().append("g").attr("class", "node_group").attr("id", d => d.id)
+
+        nodes_enter.append("circle").attr('r', d=> {
+                 return scaleD(Math.sqrt(d.degree))
             })
-            .attr("id", d=> d.id)
             .attr('stroke', 'SeaGreen')
             .attr('stroke-width', 2)
             //.attr("fill", function(d) { return color(d.group); })
-            .attr("fill", function(d) { 
+            .attr("fill", function(d) {
                 if (d.type === "uri") {
                     return "SandyBrown"
                 } else if (d.type === "bnode") {
@@ -148,22 +155,40 @@ let Draw_Force = function (height, width) {
             .on("click", onClickNode)
             .on("dblclick", dragend)
             .call(d3.drag()
-                 .on("start", dragstart)
-                 .on("drag", drag))
-                //.on("end", dragended)
-                //.on("start", dragstart))
-            .merge(nodes)
+                .on("start", dragstart)
+                .on("drag", drag))
+            //.on("end", dragended)
+            //.on("start", dragstart))
 
-        // nodes.transition()
-        //     .duration(10)
-        //     // .attr('r', d=>{
-        //     //     // console.log("nodeslist", nodes_list)
-        //     //     // console.log("node", d)
-        //     //     return scaleR(d.degree)
-        //     // } );
-
-        nodes.append("title")
+        nodes_enter.append("title")
             .text(function(d) { return d.id; });
+        nodes_enter.append("text").text(d=> d.label)
+            .attr("class", "nodeLabel")
+            .attr("dy", d => 2*scaleD(Math.sqrt(d.degree)))
+            .attr("dx", d => 2* scaleD(Math.sqrt(d.degree)))
+        
+        
+        let nodes_exit = nodes.exit()
+        
+        nodes_exit.selectAll("circle")
+            .transition().duration(1000)
+            .attr('opacity', 0)
+            .attr("r", 0)
+            //.attr("fill", function(d) { return color(d.group); })
+            .remove();
+
+        nodes_exit.selectAll("text")
+            .transition().duration(1000)
+            .attr("opacity", 0)
+            //.attr("fill", function(d) { return color(d.group); })
+            .remove();
+        nodes_exit.remove()
+
+
+        nodes = this.nodes_group.selectAll(".node_group").data(nodes_list, d => d.id)
+        link_labels = d3.selectAll(".edgelabel").data(edges_list, d=>d.id)
+
+
 
         simulation
             .nodes(nodes_list)
@@ -174,6 +199,8 @@ let Draw_Force = function (height, width) {
 
         simulation.alphaTarget(0.1).restart();
         set_status_info("Successfully draw the picture")
+        hasDisplayEdgeLable()
+        hasDisplayNodeLable()
     }
 
     let adjlist = [];
@@ -310,14 +337,29 @@ let Draw_Force = function (height, width) {
             { return d && 'M ' 
             + d.source.x + ' ' 
             + d.source.y + ' L ' + d.target.x + ' ' + d.target.y; }) 
-            // .attr("x1", function(d) { return d.source.x; })
-            // .attr("y1", function(d) { return d.source.y; })
-            // .attr("x2", function(d) { return d.target.x; })
-            // .attr("y2", function(d) { return d.target.y; });
+
 
         nodes
-            .attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            })
+
+
+        link_labels.attr("transform", function(d) { //calcul de l'angle du label
+            var angle = Math.atan((d.source.y - d.target.y) / (d.source.x - d.target.x)) * 180 / Math.PI;
+            return 'translate(' + [((d.source.x + d.target.x) / 2), ((d.source.y + d.target.y) / 2)] + ')rotate(' + angle + ')';
+        });
+        // link_labels.attr('transform',function(d,i){
+        //     if (d.target.x<d.source.x){
+        //         // bbox = this.getBBox();
+        //         // rx = bbox.x+bbox.width/2;
+        //         // ry = bbox.y+bbox.height/2;
+        //         // return 'rotate(180 '+rx+' '+ry+')';
+        //     }
+        //     else {
+        //         return 'rotate(0)';
+        //     }
+        // });
     }
 
     // function dblclick(d) {
