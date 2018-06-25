@@ -98,9 +98,7 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 
 La partie principale de l’algorithme consiste en trois parties. Tout d’abord, on explore le graphe pour trouver des sommets qui connectent les sommets “mot clef”. Ensuite, on génère des match à partir des sommets connectant les sommets “mot clef” et on obtient des centaines de milliers de sous graphes( graphe résumé ). Pour finir, on extrait les top-k sous graphes qui correspondent le mieux au mots clefs de l'utilisateur. Lors de l’exploration du graphe, pour chaque mot clef on a une file de priorité de triplets (sommet , chemin vers un sommet “mot clef” , longueur du chemin). Tous les éléments sont triés dans l’ordre non descendant de la longueur du chemin. Chaque mot clef est aussi associé à un ensemble de résultats dans lequel on peut trouver tous les sommets visibles avec un chemin de longueur inférieur à l’infinie.
 
-Pour la génération des match de sous graphes, on utilise un algorithme basé sur le parcours en profondeur pour réaliser le processus de matching en commençant par un sommet v qui est directement visible par le sommet “mot clef”.  Supposons que v match un sommet u dans la requête Q, alors on cherche le graphe pour atteindre le voisin de v qui est un voisin de u et dont l'arête qui les relies est une arête de la requête. Le recherche va s’étendre pas à pas jusqu’à ce que l’on trouve un match ou que l’on ne puisse plus continuer. Pour accélérer la traversée, on sélectionne des sommets que l’on appellera pivots et on calcul les arbres de plus courts ayant pour racine ces pivots. Si la traversée rencontre un pivot, on peut utiliser l’arbre de plus court chemin afin d’explorer l’espace. Enfin, afin de calculer les top-k match, on commence par calculer le coût des match avec les sous graphes pour lesquels les sommets sont directement visibles par les mots clefs, ce qui peut mener à un seuil d’évaluation représentant le k-ième plus petit coût jusqu'à maintenant. Quand il y a moins de k match de ce type, le seuil devrait être infinie. Si le seuil est inférieur à toutes les évaluations des match où tous les sommets ne sont pas visible directement par les mots clefs, l'algorithme s’arretera et renverra les résultats qu’il a trouvé, sinon l’algorithme entame la prochaine itération.
-
-![figure](doc/Diagram1.jpg)
+![figure](doc/Diagram.jpg)
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
@@ -111,6 +109,11 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 **18/06-22/06**
 
 #### Partie algorithme
+
+Pour la génération des match de sous graphes, on utilise un algorithme basé sur le parcours en profondeur pour réaliser le processus de matching en commençant par un sommet v qui est directement visible par le sommet “mot clef”.  Supposons que v match un sommet u dans la requête Q, alors on cherche le graphe pour atteindre le voisin de v qui est un voisin de u et dont l'arête qui les relies est une arête de la requête. Le recherche va s’étendre pas à pas jusqu’à ce que l’on trouve un match ou que l’on ne puisse plus continuer. Pour accélérer la traversée, on sélectionne des sommets que l’on appellera pivots et on calcul les arbres de plus courts ayant pour racine ces pivots. Si la traversée rencontre un pivot, on peut utiliser l’arbre de plus court chemin afin d’explorer l’espace. Enfin, afin de calculer les top-k match, on commence par calculer le coût des match avec les sous graphes pour lesquels les sommets sont directement visibles par les mots clefs, ce qui peut mener à un seuil d’évaluation représentant le k-ième plus petit coût jusqu'à maintenant. Quand il y a moins de k match de ce type, le seuil devrait être infinie. Si le seuil est inférieur à toutes les évaluations des match où tous les sommets ne sont pas visible directement par les mots clefs, l'algorithme s’arretera et renverra les résultats qu’il a trouvé, sinon l’algorithme entame la prochaine itération.
+
+On remarque que les résultats du graphe résumé retournés par l’algorithme sont des triplets et ils peuvent être visualisés comme un graphe. Les réponses à la requête Q ne sont pas nécessairement liées directement aux variables dans la question des utilisateurs. Cependant on peut donner une autre requête de mots clefs et l’algorithme prendra en compte les réponses précédentes ainsi que les nouvelles variables . Ainsi, le deuxième graphe résumé retourné par l’algorithme révèlera de façon intuitive le lien logique entre les réponse et la question.
+
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
 [*Retour au calendrier*](#développement-du-projet)
@@ -120,6 +123,91 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 **25/06-29/06**
 
 #### Partie algorithme
+
+On a exporté le programme dans un seul fichier jar, nommé `algo-windows.jar` (et `algo-linux.jar` pour Linux) que vous pouvez appeler dans le terminal. Les deux versions utilisent un exécutable de l'algorithme FP growth compilé respectivement sous Windows et Linux.
+
+Comment ça marche:
+- `git clone <https://xxx>` et vous trouverez un répertoire **workspace** où se trouvent toutes les choses nécessaires pour l'exécution;
+- information utile:
+```shell
+java -classpath algo-windows.jar Indexing -h
+java -classpath algo-windows.jar SparqlQuery -h
+java -classpath algo-windows.jar SummaryGraph -h
+```
+- exécution:
+```shell
+java -classpath algo-windows.jar Indexing data/sembib.nt 200 0
+java -classpath algo-windows.jar SparqlQuery data/sembib_Q1.txt 10
+java -classpath algo-windows.jar SummaryGraph data/sembib.nt data/sembib_Q1.txt 20
+```
+
+**Attention**:
+- Chaque fois quand vous voulez changer le database (sembib, DBLP, Yago...), vous devez exécuter d'abord `Indexing`, c'est la première chose à faire;
+- Il y a `structrual index` dans `Indexing` qui est seulement nécessaire pour répondre à une query, et c'est lui qui prendra beaucoup de temps pour grandes données. Donc, choisissez de ne pas exécuter `structrual index` quand vous voulez juste tester le graph de résumé.
+- Toute autre information, merci de bien lire les instructions en donnant `-h`.
+
+Voici un résultat d'un petit démo sur `persons.nt`, une partie de sembib.
+
+- distance = 10, keyword = "Moissinac"
+
+```nt
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+```
+- distance = 10, keyword = "Moissinac;Thomas"
+
+```nt
+<http://givingsense.eu/sembib/onto/persons/Bonald_Thomas> <http://xmlns.com/foaf/0.1/name> "Thomas Bonald"
+<http://givingsense.eu/sembib/onto/persons/ROBERT_Thomas> <http://xmlns.com/foaf/0.1/name> "Thomas ROBERT"
+<http://givingsense.eu/sembib/onto/persons/Anfray_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Anfray"
+<http://givingsense.eu/sembib/onto/persons/Risse_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Risse"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Fillon_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Fillon"
+<http://givingsense.eu/sembib/onto/persons/Pietrzak_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Pietrzak"
+<http://givingsense.eu/sembib/onto/persons/Thomas_S_> <http://xmlns.com/foaf/0.1/name> "Albert Thomas"
+<http://givingsense.eu/sembib/onto/persons/Engel_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Engel"
+<http://givingsense.eu/sembib/onto/persons/Hueber_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Hueber"
+<http://givingsense.eu/sembib/onto/persons/Hurtut_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Hurtut"
+<http://givingsense.eu/sembib/onto/persons/Maugey_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Maugey"
+<http://givingsense.eu/sembib/onto/persons/Thomas_E_> <http://xmlns.com/foaf/0.1/name> "Albert Thomas"
+<http://givingsense.eu/sembib/onto/persons/Courtat_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Courtat"
+<http://givingsense.eu/sembib/onto/persons/Janssoone_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Janssoone"
+<http://givingsense.eu/sembib/onto/persons/Thomas_A_> <http://xmlns.com/foaf/0.1/name> "Albert Thomas"
+<http://givingsense.eu/sembib/onto/persons/Vergnaud_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Vergnaud"
+<http://givingsense.eu/sembib/onto/persons/Lawson_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Lawson"
+<http://givingsense.eu/sembib/onto/persons/Andr%C3%A9_E_> <http://xmlns.com/foaf/0.1/name> "Thomas Andr\u00E9"
+<http://givingsense.eu/sembib/onto/persons/Laich_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Laich"
+<http://givingsense.eu/sembib/onto/persons/Zemen_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Zemen"
+<http://givingsense.eu/sembib/onto/persons/HOUY_Thomas> <http://xmlns.com/foaf/0.1/name> "Thomas HOUY"
+<http://givingsense.eu/sembib/onto/persons/Gaujoux_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Gaujoux"
+<http://givingsense.eu/sembib/onto/persons/Andr%25C3%25A9_J_%2520C_> <http://xmlns.com/foaf/0.1/name> "Thomas Andr\u00E9"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Thomas_J_> <http://xmlns.com/foaf/0.1/name> "Albert Thomas"
+<http://givingsense.eu/sembib/onto/persons/Quinot_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Quinot"
+<http://givingsense.eu/sembib/onto/persons/Thomas_O_> <http://xmlns.com/foaf/0.1/name> "Albert Thomas"
+<http://givingsense.eu/sembib/onto/persons/H%25C3%25A9lie_T_> <http://xmlns.com/foaf/0.1/name> "Thomas H\u00E9lie"
+<http://givingsense.eu/sembib/onto/persons/Andr%25C3%25A9_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Andr\u00E9"
+<http://givingsense.eu/sembib/onto/persons/Sikora_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Sikora"
+<http://givingsense.eu/sembib/onto/persons/Lavergne_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Lavergne"
+<http://givingsense.eu/sembib/onto/persons/Rocher_Th_> <http://xmlns.com/foaf/0.1/name> "Thomas Rocher"
+<http://givingsense.eu/sembib/onto/persons/Icart_T_> <http://xmlns.com/foaf/0.1/name> "Thomas Icart"
+<http://givingsense.eu/sembib/onto/persons/Andr%25C3%25A9_F_> <http://xmlns.com/foaf/0.1/name> "Thomas Andr\u00E9"
+```
+- distance = 20, keyword = "Moissinac"
+
+```nt
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://purl.org/spar/pro/holdsRoleInTime> <http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude-author>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://purl.org/spar/pro/holdsRoleInTime> <http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude-at-tpt>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/familyName> "Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_Jean-Claude> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/familyName> "Moissinac"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/givenName> "Jean-Claude"
+<http://givingsense.eu/sembib/onto/persons/Moissinac_H_> <http://xmlns.com/foaf/0.1/name> "Jean-Claude Moissinac"
+```
+
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
 [*Retour au calendrier*](#développement-du-projet)
