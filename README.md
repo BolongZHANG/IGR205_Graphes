@@ -33,6 +33,10 @@ Un nombre grandissant d'entreprises et de centres de recherche travaillent à é
 Pour ce projet, le jeu de données SemBib sera exploité, en liaison avec d'autres comme HAL, DBPedia, Orcid... Sembib est un ensemble de graphes de connaissances décrivant les près de 12000 publications scientifiques produites par Telecom ParisTech depuis 1969. D'autres ensembles de données pourront être proposés.
 Le but va être d'explorer différentes possibilités pour la visualisation et l'exploration de tels ensembles de données et d'analyser les avantages et les inconvénient de différentes approches existantes. L'article en référence est une bonne base sur ce sujet ; d'autres pistes seront proposées et enfin, d'autres pourront être explorées à l'initiative du groupe.
 
+
+## How to use:
+Pour voir le visualization, clique le [lien](visualisation_module/demo_final/README.md)
+ 
 ## Développement du projet
 
 - [**Semaine 1**](#semaine-1)
@@ -41,9 +45,8 @@ Le but va être d'explorer différentes possibilités pour la visualisation et l
 - [**Semaine 4**](#semaine-4)
 - [**Semaine 5**](#semaine-5)
 
-## Partie visualisation
 
-Voir le [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf)
+
 
 ### Semaine 1
 **28/05-01/06**
@@ -67,6 +70,9 @@ Le graphe “résumé” est un graphe constitué seulement des sommets de type 
 ![figure](doc/graph.png)
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
+
+#### Partie algorithme
+Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposé par ce livre. Vous pouvez trouvez la trace dans le [dossier](E:\telecom_paristech\IGR205_Graphes\visualisation_module\demo_datamusse\js).
 
 [*Retour au calendrier*](#développement-du-projet)
 
@@ -92,6 +98,13 @@ On commence par un indexage hors ligne où les donnée du graphe sont traitées 
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
+#### Partie Visualisation
+Nous avons continué à étudié la D3 et on constate que la froce-graph bien répond à notre besion. Par conseqent, on cherche des démo sur l'internet et le tester. Vous pouvez trouvez ces examples dans ce [dossier](visualisation_module/example_inspiration)
+
+ Avant de visualisation, on doit bien connaitre la structure de graph. On a commencé à travailler sur la base de donnée **sembib**.  On tout d'abord analyser ce base de donnée à l'aide de python package [networkx](https://networkx.github.io/). On trouve que ce database contient plusieur sous composent independant. Du coup, on crée mon [premier demo](visualisation_module/demo_datamusse/index.html) pour visulaliser cette charactéristique.On tout d'abord traiter les donnée avec python et creer un fichier de json pour chaque composant.
+![alt text](img/demo-1-total.png "Logo Title Text 1")
+Dans la premier vue, tu peut voir centaine cercles indépendant sur ce graph. Chaque cricle est un composante faible connexe. Si on clique sur ces cercle, on peut voir le detail de ce composants.
+
 [*Retour au calendrier*](#développement-du-projet)
 
 
@@ -108,6 +121,16 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 
 [*Retour au calendrier*](#développement-du-projet)
 
+### Partie visualisation
+Cette semaine, on a travaillé sur **sembib**.
+On a essayé d'utiliser autre type graph pour visulasation, par example, tree ou chord. 
+
+On trouve que la base de donnée, sembib, contiens plusier composant indépendant. Chaque composant est un sous-graph 
+On écrit une programme afin de tester tous les sous-graphe.  A l'aide de python package [networkx](https://networkx.github.io/), on trouve que plus part de sous-graph ne contiens pas un "spanning arborescence". C'est à dire il n'est pas possible de créer une tree comme ue visualisation général pour **sembib**.
+
+On tente de faire un chord avec ces données. Afin de realiser ce graph, il faut attribuer chaque node un "type" indiqué la groupde de ce node. Mais les collègues qui travaillent sur la partie algorithme nous ont dit que il n'est pas possible de  attribuer chaque node un type. Donc, on ne pouvez pas créer une chrod comme une visualisation géneral.
+
+Par `Bolong ZHANG` et `Fangda ZHU`
 
 ### Semaine 4
 **18/06-22/06**
@@ -120,6 +143,13 @@ On remarque que les résultats du graphe résumé retournés par l’algorithme 
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
+#### Partie visualisation
+Dans cette semaine, on décide de crée un outil visualisation afin de visualiser n'import quel base de donnée.
+Ce outil recois le fichier de rdf sous format json, et le visualise. Vous pouvez trouver la l'introduction sur ce outil dans ce [lien](visualisation_module\demo_final\README.md).
+
+Sachant que mes collégue propose des différent de method pour obtenir la graphe résumé. Afin d'adapter cette demande, on crée un page de web inspiré par le travail de `Corentin` en cours IGR204. 
+
+Par `Fangda ZHU` et `Bolong Zhang`
 [*Retour au calendrier*](#développement-du-projet)
 
 
@@ -213,6 +243,12 @@ Voici un résultat d'un petit démo sur `persons.nt`, une partie de sembib.
 ```
 
 Par `Yukun BAO` et `Corentin ROBINEAU`
+
+
+#### Partie visualisation
+Cette semaine, on fixed des bugs dans notre programme et continue faire des amélioration. Pour la detail, je vous conseille de voir le [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf)
+
+Par `Fangda ZHU` et `Bolong Zhang`
 
 [*Retour au calendrier*](#développement-du-projet)
 
