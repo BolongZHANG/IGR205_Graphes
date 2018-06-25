@@ -1,0 +1,7 @@
+*.jdb
+*.nt
+Vis.iml
+misc.xml
+modules.xml
+workspace.xml
+workspace/index/
