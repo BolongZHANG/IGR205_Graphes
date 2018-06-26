@@ -74,6 +74,8 @@ Par `Yukun BAO` et `Corentin ROBINEAU`
 #### Partie visualisation
 Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposé par ce livre. Vous pouvez trouvez la trace dans le [dossier](visualisation_module\demo_datamusse\js).
 
+Par `Bolong ZHANG` et `Fangda ZHU`
+
 [*Retour au calendrier*](#développement-du-projet)
 
 ### Semaine 2
@@ -104,6 +106,8 @@ Nous avons continué à étudié la D3 et on constate que la froce-graph bien r�
  visualisation, on doit bien connaitre la structure de graph. On a commencé à travailler sur la base de donnée **sembib**.  On tout d'abord analyser ce base de donnée à l'aide de python package [networkx](https://networkx.github.io/). On trouve que ce database contient plusieur sous composent independant. Du coup, on crée mon [premier demo](visualisation_module/demo_datamusse/index.html) pour visulaliser cette charactéristique.
 ![alt text](doc/demo-1-total.png)
 Dans la première vue, Vous pouvez voir centaine cercles indépendant sur ce graph. Chaque cricle est un composante faible connexe. Si on clique sur ces cercle, on peut voir le detail de ce composants.
+
+Par `Bolong ZHANG` et `Fangda ZHU`
 
 [*Retour au calendrier*](#développement-du-projet)
 
