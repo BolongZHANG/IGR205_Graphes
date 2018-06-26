@@ -72,7 +72,7 @@ Le graphe “résumé” est un graphe constitué seulement des sommets de type 
 Par `Yukun BAO` et `Corentin ROBINEAU`
 
 #### Partie visualisation
-Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposé par ce livre. Vous pouvez trouvez la trace dans le [dossier](visualisation_module\demo_datamusse\js).
+Comme on decide de l'utiliser le D3 comme un outil de visualisation, nous deux commence à étudier D3 systématiquement afin de bien comprendre son mécanisme. Après plusier de recherche, nous deux ont porré par livre  [Interactive Data Visualization for the Webs](http://shop.oreilly.com/product/0636920026938.do). On a suivi ce livre et refait des examples proposés par ce livre. Vous pouvez trouver la trace dans le [dossier](visualisation_module/demo_datamusse/js).
 
 Par `Bolong ZHANG` et `Fangda ZHU`
 

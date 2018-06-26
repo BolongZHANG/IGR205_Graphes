@@ -153,7 +153,7 @@ function updateSubgraph (nodeNb, indicator) {
   draw_function.updateGraph(subG)
 }
 
-let server = 'http://127.0.0.1:8815/summary_graph?'
+let server = 'http://127.0.0.1:5000/summary_graph?'
 let summary_graph_data
 
 function submit_keyword () {

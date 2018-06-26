@@ -11,6 +11,33 @@ app = Flask(__name__)
 
 CORS(app, supports_credentials=True)
 
+def summary_graph(keyword, k = 20, database = 'sembib', verbose=False):
+    parent_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
+    jar_path = parent_path + "\\algo-windows.jar"
+
+    if database == "sembib":
+        os.chdir(parent_path + "\sembib")
+        print("Current dir：",os.getcwd())
+        command = "java -classpath " + jar_path + " SummaryGraph data/sembib.nt data/keyword.txt " + str(k)
+    else:
+        os.chdir(parent_path + "\dblp")
+        print("Current dir：",os.getcwd())
+        command = "java -classpath " + jar_path + " SummaryGraph data/DBLP.nt data/keyword.txt " + str(k)
+
+    with open("data/keyword.txt",'w' ) as file:
+        file.write(keyword)
+
+
+    print("Eecute command:" + command)
+    output = os.popen(command).read()
+    if verbose:
+        a = str.split("\n")
+        for b in a:
+            print(b)
+
+    return transform_to_json()
+
+
 @app.route('/')
 def hello_world():
     print('Hello World-2!')
@@ -38,31 +65,6 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-def summary_graph(keyword, k = 20, database = 'sembib', verbose=False):
-    parent_path = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
-    jar_path = parent_path + "\\algo-windows.jar"
-
-    if database == "sembib":
-        os.chdir(parent_path + "\sembib")
-        print("Current dir：",os.getcwd())
-        command = "java -classpath " + jar_path + " SummaryGraph data/sembib.nt data/keyword.txt " + str(k)
-    else:
-        os.chdir(parent_path + "\dblp")
-        print("Current dir：",os.getcwd())
-        command = "java -classpath " + jar_path + " SummaryGraph data/DBLP.nt data/keyword.txt " + str(k)
-
-    with open("data/keyword.txt",'w' ) as file:
-        file.write(keyword)
-
-
-    print("Eecute command:" + command)
-    output = os.popen(command).read()
-    if verbose:
-        a = str.split("\n")
-        for b in a:
-            print(b)
-
-    return transform_to_json()
 
 
 def back_summay_fin(keyword, k=20, database='sembib', verbose=False):
