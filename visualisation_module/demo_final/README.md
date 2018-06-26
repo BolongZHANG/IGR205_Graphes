@@ -18,8 +18,6 @@ http://127.0.0.1:8081 est le lien se server. Vous copiez ce lien dans votre navi
 Si vous voulez utiliser la mode **keyword**, il faut éxécuter autre server proposé par notre groupe. Pour plus de detail, voir ce [lien](../../server_module/README.md)
 
 ## Fonctionalité
-
-En train de constuire.......
-Pour l'instant, vous pouvez vour notre [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf) pour plus de detail.
+Voir le detail sur notre [rapport](https://github.com/BolongZHANG/IGR205_Graphes/blob/master/Interactions%20sur%20des%20graphes%20de%20connaissances%20interconnect%C3%A9s.pdf) pour plus de detail.
 
 
